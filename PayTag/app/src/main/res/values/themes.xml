@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark Theme (default) -->
+    <style name="Theme.PayTag" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">#6C3CE1</item>
+        <item name="colorPrimaryVariant">#4A1DB5</item>
+        <item name="colorSecondary">#E94E7A</item>
+        <item name="android:windowBackground">#0A0A0F</item>
+        <item name="android:statusBarColor">#0A0A0F</item>
+        <item name="android:navigationBarColor">#0A0A0F</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:dialogTheme">@style/ThemeOverlay.Material3.MaterialAlertDialog</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.Material3.MaterialAlertDialog</item>
+        <item name="colorSurface">#141420</item>
+        <item name="colorSurfaceVariant">#1A1A2E</item>
+        <item name="colorOnSurface">#FFFFFF</item>
+        <item name="colorOnSurfaceVariant">#B8B8CC</item>
+    </style>
+
+    <!-- Light Theme -->
+    <style name="Theme.PayTag.Light" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">#6C3CE1</item>
+        <item name="colorPrimaryVariant">#4A1DB5</item>
+        <item name="colorSecondary">#E94E7A</item>
+        <item name="android:windowBackground">#F5F5FA</item>
+        <item name="android:statusBarColor">#F5F5FA</item>
+        <item name="android:navigationBarColor">#F5F5FA</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:dialogTheme">@style/ThemeOverlay.Material3.MaterialAlertDialog</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.Material3.MaterialAlertDialog</item>
+        <item name="colorSurface">#FFFFFF</item>
+        <item name="colorSurfaceVariant">#F0F0F5</item>
+        <item name="colorOnSurface">#1A1A2E</item>
+        <item name="colorOnSurfaceVariant">#6C6C80</item>
+    </style>
+
+    <style name="Theme.PayTag.Transparent" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+    </style>
+
+    <style name="DialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/fade_scale_in</item>
+        <item name="android:windowExitAnimation">@anim/slide_up</item>
+    </style>
+</resources>

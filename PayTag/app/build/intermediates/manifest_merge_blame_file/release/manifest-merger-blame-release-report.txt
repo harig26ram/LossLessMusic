@@ -1,0 +1,207 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.example.paytag"
+4    android:versionCode="7"
+5    android:versionName="6.1" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="26"
+9        android:targetSdkVersion="35" />
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:4:5-66
+11-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:4:22-64
+12
+13    <permission
+13-->[androidx.core:core:1.12.0] C:\Users\harig\.gradle\caches\transforms-3\a02af45ee381eb3587200483e4a20c77\transformed\core-1.12.0\AndroidManifest.xml:22:5-24:47
+14        android:name="com.example.paytag.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+14-->[androidx.core:core:1.12.0] C:\Users\harig\.gradle\caches\transforms-3\a02af45ee381eb3587200483e4a20c77\transformed\core-1.12.0\AndroidManifest.xml:23:9-81
+15        android:protectionLevel="signature" />
+15-->[androidx.core:core:1.12.0] C:\Users\harig\.gradle\caches\transforms-3\a02af45ee381eb3587200483e4a20c77\transformed\core-1.12.0\AndroidManifest.xml:24:9-44
+16
+17    <uses-permission android:name="com.example.paytag.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+17-->[androidx.core:core:1.12.0] C:\Users\harig\.gradle\caches\transforms-3\a02af45ee381eb3587200483e4a20c77\transformed\core-1.12.0\AndroidManifest.xml:26:5-97
+17-->[androidx.core:core:1.12.0] C:\Users\harig\.gradle\caches\transforms-3\a02af45ee381eb3587200483e4a20c77\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
+18
+19    <application
+19-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:6:5-65:19
+20        android:allowBackup="true"
+20-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:7:9-35
+21        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+21-->[androidx.core:core:1.12.0] C:\Users\harig\.gradle\caches\transforms-3\a02af45ee381eb3587200483e4a20c77\transformed\core-1.12.0\AndroidManifest.xml:28:18-86
+22        android:extractNativeLibs="false"
+23        android:icon="@mipmap/ic_launcher"
+23-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:8:9-43
+24        android:label="@string/app_name"
+24-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:9:9-41
+25        android:supportsRtl="true"
+25-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:11:9-35
+26        android:theme="@style/Theme.PayTag" >
+26-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:10:9-44
+27        <activity
+27-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:13:9-20:20
+28            android:name="com.example.paytag.LoginActivity"
+28-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:14:13-42
+29            android:exported="true" >
+29-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:15:13-36
+30            <intent-filter>
+30-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:16:13-19:29
+31                <action android:name="android.intent.action.MAIN" />
+31-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:17:17-68
+31-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:17:25-66
+32
+33                <category android:name="android.intent.category.LAUNCHER" />
+33-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:18:17-76
+33-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:18:27-74
+34            </intent-filter>
+35        </activity>
+36        <activity
+36-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:22:9-24:39
+37            android:name="com.example.paytag.GroupActivity"
+37-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:23:13-42
+38            android:exported="false" />
+38-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:24:13-37
+39        <activity
+39-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:26:9-28:39
+40            android:name="com.example.paytag.MainActivity"
+40-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:27:13-41
+41            android:exported="false" />
+41-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:28:13-37
+42        <activity
+42-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:30:9-32:39
+43            android:name="com.example.paytag.CalendarActivity"
+43-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:31:13-45
+44            android:exported="false" />
+44-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:32:13-37
+45        <activity
+45-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:34:9-36:39
+46            android:name="com.example.paytag.ChartsActivity"
+46-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:35:13-43
+47            android:exported="false" />
+47-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:36:13-37
+48        <activity
+48-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:38:9-42:57
+49            android:name="com.example.paytag.WidgetPopupActivity"
+49-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:39:13-48
+50            android:exported="false"
+50-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:40:13-37
+51            android:theme="@style/Theme.PayTag.Transparent"
+51-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:41:13-60
+52            android:windowSoftInputMode="adjustResize" />
+52-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:42:13-55
+53
+54        <provider
+55            android:name="androidx.core.content.FileProvider"
+55-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:45:13-62
+56            android:authorities="com.example.paytag.fileprovider"
+56-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:46:13-64
+57            android:exported="false"
+57-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:47:13-37
+58            android:grantUriPermissions="true" >
+58-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:48:13-47
+59            <meta-data
+59-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:49:13-51:53
+60                android:name="android.support.FILE_PROVIDER_PATHS"
+60-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:50:17-67
+61                android:resource="@xml/file_paths" />
+61-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:51:17-51
+62        </provider>
+63
+64        <receiver
+64-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:54:9-63:20
+65            android:name="com.example.paytag.widget.PayTagWidget"
+65-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:55:13-48
+66            android:exported="true" >
+66-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:56:13-36
+67            <intent-filter>
+67-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:57:13-59:29
+68                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+68-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:58:17-83
+68-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:58:25-81
+69            </intent-filter>
+70
+71            <meta-data
+71-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:60:13-62:61
+72                android:name="android.appwidget.provider"
+72-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:61:17-58
+73                android:resource="@xml/paytag_widget_info" />
+73-->C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\AndroidManifest.xml:62:17-59
+74        </receiver>
+75
+76        <provider
+76-->[androidx.emoji2:emoji2:1.2.0] C:\Users\harig\.gradle\caches\transforms-3\a65dd08b83d5118d050f511d4f15902d\transformed\emoji2-1.2.0\AndroidManifest.xml:24:9-32:20
+77            android:name="androidx.startup.InitializationProvider"
+77-->[androidx.emoji2:emoji2:1.2.0] C:\Users\harig\.gradle\caches\transforms-3\a65dd08b83d5118d050f511d4f15902d\transformed\emoji2-1.2.0\AndroidManifest.xml:25:13-67
+78            android:authorities="com.example.paytag.androidx-startup"
+78-->[androidx.emoji2:emoji2:1.2.0] C:\Users\harig\.gradle\caches\transforms-3\a65dd08b83d5118d050f511d4f15902d\transformed\emoji2-1.2.0\AndroidManifest.xml:26:13-68
+79            android:exported="false" >
+79-->[androidx.emoji2:emoji2:1.2.0] C:\Users\harig\.gradle\caches\transforms-3\a65dd08b83d5118d050f511d4f15902d\transformed\emoji2-1.2.0\AndroidManifest.xml:27:13-37
+80            <meta-data
+80-->[androidx.emoji2:emoji2:1.2.0] C:\Users\harig\.gradle\caches\transforms-3\a65dd08b83d5118d050f511d4f15902d\transformed\emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
+81                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+81-->[androidx.emoji2:emoji2:1.2.0] C:\Users\harig\.gradle\caches\transforms-3\a65dd08b83d5118d050f511d4f15902d\transformed\emoji2-1.2.0\AndroidManifest.xml:30:17-75
+82                android:value="androidx.startup" />
+82-->[androidx.emoji2:emoji2:1.2.0] C:\Users\harig\.gradle\caches\transforms-3\a65dd08b83d5118d050f511d4f15902d\transformed\emoji2-1.2.0\AndroidManifest.xml:31:17-49
+83            <meta-data
+83-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\harig\.gradle\caches\transforms-3\ad616490e5007ea00af6ea4a015028d1\transformed\lifecycle-process-2.7.0\AndroidManifest.xml:29:13-31:52
+84                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+84-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\harig\.gradle\caches\transforms-3\ad616490e5007ea00af6ea4a015028d1\transformed\lifecycle-process-2.7.0\AndroidManifest.xml:30:17-78
+85                android:value="androidx.startup" />
+85-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\harig\.gradle\caches\transforms-3\ad616490e5007ea00af6ea4a015028d1\transformed\lifecycle-process-2.7.0\AndroidManifest.xml:31:17-49
+86            <meta-data
+86-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:29:13-31:52
+87                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+87-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:30:17-85
+88                android:value="androidx.startup" />
+88-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:31:17-49
+89        </provider>
+90
+91        <service
+91-->[androidx.room:room-runtime:2.6.1] C:\Users\harig\.gradle\caches\transforms-3\c185ffcef3eb50e34dc6c707688edf76\transformed\room-runtime-2.6.1\AndroidManifest.xml:24:9-28:63
+92            android:name="androidx.room.MultiInstanceInvalidationService"
+92-->[androidx.room:room-runtime:2.6.1] C:\Users\harig\.gradle\caches\transforms-3\c185ffcef3eb50e34dc6c707688edf76\transformed\room-runtime-2.6.1\AndroidManifest.xml:25:13-74
+93            android:directBootAware="true"
+93-->[androidx.room:room-runtime:2.6.1] C:\Users\harig\.gradle\caches\transforms-3\c185ffcef3eb50e34dc6c707688edf76\transformed\room-runtime-2.6.1\AndroidManifest.xml:26:13-43
+94            android:exported="false" />
+94-->[androidx.room:room-runtime:2.6.1] C:\Users\harig\.gradle\caches\transforms-3\c185ffcef3eb50e34dc6c707688edf76\transformed\room-runtime-2.6.1\AndroidManifest.xml:27:13-37
+95
+96        <receiver
+96-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:34:9-52:20
+97            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+97-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:35:13-76
+98            android:directBootAware="false"
+98-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:36:13-44
+99            android:enabled="true"
+99-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:37:13-35
+100            android:exported="true"
+100-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:38:13-36
+101            android:permission="android.permission.DUMP" >
+101-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:39:13-57
+102            <intent-filter>
+102-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:40:13-42:29
+103                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+103-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:17-91
+103-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:25-88
+104            </intent-filter>
+105            <intent-filter>
+105-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:43:13-45:29
+106                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+106-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:17-85
+106-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:25-82
+107            </intent-filter>
+108            <intent-filter>
+108-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:46:13-48:29
+109                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+109-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:17-88
+109-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:25-85
+110            </intent-filter>
+111            <intent-filter>
+111-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:49:13-51:29
+112                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+112-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:17-95
+112-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:25-92
+113            </intent-filter>
+114        </receiver>
+115    </application>
+116
+117</manifest>

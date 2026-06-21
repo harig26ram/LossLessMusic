@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PayTag</string>
+    <string name="tag_payment">Tag Payment</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="add_custom_category">Add Custom Category</string>
+    <string name="edit_expense">Edit Expense</string>
+    <string name="add_expense">Add Expense</string>
+    <string name="note_hint">What was this for?</string>
+    <string name="amount_hint">Amount (Rs.)</string>
+    <string name="category_hint">Category</string>
+    <string name="delete_confirm">Delete this expense?</string>
+    <string name="default_web_client_id">REPLACE_WITH_FIREBASE_WEB_CLIENT_ID</string>
+</resources>

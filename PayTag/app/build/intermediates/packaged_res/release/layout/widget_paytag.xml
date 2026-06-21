@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="8dp"
+    android:background="@drawable/widget_background">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PayTag"
+        android:textSize="10sp"
+        android:textColor="#B8B8CC"
+        android:letterSpacing="0.08"/>
+
+    <TextView
+        android:id="@+id/widgetTotal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rs.0"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:layout_marginTop="2dp"/>
+
+    <TextView
+        android:id="@+id/widgetMonth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Jun 2026"
+        android:textSize="10sp"
+        android:textColor="#B8B8CC"
+        android:layout_marginTop="1dp"/>
+
+    <TextView
+        android:id="@+id/widgetAddBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="+ Add"
+        android:textSize="11sp"
+        android:textColor="#4ECDC4"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="6dp"
+        android:layout_marginTop="4dp"/>
+</LinearLayout>

@@ -1,0 +1,22 @@
+# Build files
+build/
+*.class
+*.log
+*.tmp
+
+# Gradle
+.gradle/
+local.properties
+
+# IDE
+.idea/
+*.iml
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PayTag build
+PayTag/app/build/
+PayTag/build/

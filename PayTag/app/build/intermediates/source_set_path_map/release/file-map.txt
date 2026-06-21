@@ -1,0 +1,42 @@
+com.example.paytag.app-startup-runtime-1.1.1-0 C:\Users\harig\.gradle\caches\transforms-3\06cc2053d2cc8dbfa23a04313d3bfac8\transformed\startup-runtime-1.1.1\res
+com.example.paytag.app-lifecycle-viewmodel-2.7.0-1 C:\Users\harig\.gradle\caches\transforms-3\19fb1634e963e28a954913b547e4a5c9\transformed\lifecycle-viewmodel-2.7.0\res
+com.example.paytag.app-lifecycle-livedata-core-2.7.0-2 C:\Users\harig\.gradle\caches\transforms-3\255bce6b5eb237c4f546869f3f8a6121\transformed\lifecycle-livedata-core-2.7.0\res
+com.example.paytag.app-appcompat-resources-1.6.1-3 C:\Users\harig\.gradle\caches\transforms-3\270e1fc472c02c57f0fc03efcbca3812\transformed\appcompat-resources-1.6.1\res
+com.example.paytag.app-lifecycle-viewmodel-savedstate-2.7.0-4 C:\Users\harig\.gradle\caches\transforms-3\2756facf3f1c1f4e42284f4cfc020948\transformed\lifecycle-viewmodel-savedstate-2.7.0\res
+com.example.paytag.app-sqlite-framework-2.4.0-5 C:\Users\harig\.gradle\caches\transforms-3\28b8ef8b3d52b95908f54b1a1c98ba2a\transformed\sqlite-framework-2.4.0\res
+com.example.paytag.app-recyclerview-1.3.2-6 C:\Users\harig\.gradle\caches\transforms-3\2b62e089ecc95ed924ea0258d91f2e6d\transformed\recyclerview-1.3.2\res
+com.example.paytag.app-drawerlayout-1.1.1-7 C:\Users\harig\.gradle\caches\transforms-3\3d657aac24a1bffd6d63383cfbe6b058\transformed\drawerlayout-1.1.1\res
+com.example.paytag.app-cardview-1.0.0-8 C:\Users\harig\.gradle\caches\transforms-3\41566863bf103aff624e14bb88402f61\transformed\cardview-1.0.0\res
+com.example.paytag.app-lifecycle-livedata-ktx-2.7.0-9 C:\Users\harig\.gradle\caches\transforms-3\4a517c31aa0c0efe5fba73cf1dda7fe4\transformed\lifecycle-livedata-ktx-2.7.0\res
+com.example.paytag.app-core-runtime-2.2.0-10 C:\Users\harig\.gradle\caches\transforms-3\4f961319d4aed48586da84f3535dabf5\transformed\core-runtime-2.2.0\res
+com.example.paytag.app-room-ktx-2.6.1-11 C:\Users\harig\.gradle\caches\transforms-3\544d5746154ffc4277e0bd421608b62a\transformed\room-ktx-2.6.1\res
+com.example.paytag.app-customview-poolingcontainer-1.0.0-12 C:\Users\harig\.gradle\caches\transforms-3\55f9cb30c6ced55edf138635029db377\transformed\customview-poolingcontainer-1.0.0\res
+com.example.paytag.app-activity-1.8.0-13 C:\Users\harig\.gradle\caches\transforms-3\564aa7483ef6d4c772c0f148730ae103\transformed\activity-1.8.0\res
+com.example.paytag.app-sqlite-2.4.0-14 C:\Users\harig\.gradle\caches\transforms-3\5843007164ef4c8867fc2cb4c1b58f2b\transformed\sqlite-2.4.0\res
+com.example.paytag.app-core-ktx-1.12.0-15 C:\Users\harig\.gradle\caches\transforms-3\5f0122a94db4f4de0cd082acd1e99c5b\transformed\core-ktx-1.12.0\res
+com.example.paytag.app-transition-1.2.0-16 C:\Users\harig\.gradle\caches\transforms-3\641314942f6c7d030f4cf7b6bda25388\transformed\transition-1.2.0\res
+com.example.paytag.app-constraintlayout-2.1.4-17 C:\Users\harig\.gradle\caches\transforms-3\6de17af1fafef4018d975c87f851457b\transformed\constraintlayout-2.1.4\res
+com.example.paytag.app-material-1.11.0-18 C:\Users\harig\.gradle\caches\transforms-3\76947f2dda4873f4ff357d73f51effc0\transformed\material-1.11.0\res
+com.example.paytag.app-lifecycle-runtime-2.7.0-19 C:\Users\harig\.gradle\caches\transforms-3\7e8990a4fde5ac3beed11fb15b5d1266\transformed\lifecycle-runtime-2.7.0\res
+com.example.paytag.app-profileinstaller-1.3.0-20 C:\Users\harig\.gradle\caches\transforms-3\7f7329b2c3e52efd5111d96d26ec605e\transformed\profileinstaller-1.3.0\res
+com.example.paytag.app-viewpager2-1.1.0-beta02-21 C:\Users\harig\.gradle\caches\transforms-3\80e29b173c91ad66774b3a625b006cc5\transformed\viewpager2-1.1.0-beta02\res
+com.example.paytag.app-coordinatorlayout-1.1.0-22 C:\Users\harig\.gradle\caches\transforms-3\8de7845006d900ef2d34e7cec1e14c11\transformed\coordinatorlayout-1.1.0\res
+com.example.paytag.app-appcompat-1.6.1-23 C:\Users\harig\.gradle\caches\transforms-3\9280386eeb9849e58ccfe273753cebc6\transformed\appcompat-1.6.1\res
+com.example.paytag.app-core-1.12.0-24 C:\Users\harig\.gradle\caches\transforms-3\a02af45ee381eb3587200483e4a20c77\transformed\core-1.12.0\res
+com.example.paytag.app-emoji2-1.2.0-25 C:\Users\harig\.gradle\caches\transforms-3\a65dd08b83d5118d050f511d4f15902d\transformed\emoji2-1.2.0\res
+com.example.paytag.app-lifecycle-process-2.7.0-26 C:\Users\harig\.gradle\caches\transforms-3\ad616490e5007ea00af6ea4a015028d1\transformed\lifecycle-process-2.7.0\res
+com.example.paytag.app-lifecycle-livedata-2.7.0-27 C:\Users\harig\.gradle\caches\transforms-3\be9438f75242ac1bb4ff266f6303cd97\transformed\lifecycle-livedata-2.7.0\res
+com.example.paytag.app-room-runtime-2.6.1-28 C:\Users\harig\.gradle\caches\transforms-3\c185ffcef3eb50e34dc6c707688edf76\transformed\room-runtime-2.6.1\res
+com.example.paytag.app-lifecycle-viewmodel-ktx-2.7.0-29 C:\Users\harig\.gradle\caches\transforms-3\c9650d6425a47213b4bba48c8f7a1d86\transformed\lifecycle-viewmodel-ktx-2.7.0\res
+com.example.paytag.app-fragment-1.3.6-30 C:\Users\harig\.gradle\caches\transforms-3\d5b158ce8dd00f5664fc9571f8d1502c\transformed\fragment-1.3.6\res
+com.example.paytag.app-annotation-experimental-1.3.0-31 C:\Users\harig\.gradle\caches\transforms-3\d863b459a8bef11bbd57f5555babcaad\transformed\annotation-experimental-1.3.0\res
+com.example.paytag.app-savedstate-1.2.1-32 C:\Users\harig\.gradle\caches\transforms-3\dc9756b06fab827edcd2ba7834ad54ad\transformed\savedstate-1.2.1\res
+com.example.paytag.app-lifecycle-livedata-core-ktx-2.7.0-33 C:\Users\harig\.gradle\caches\transforms-3\e2eba7dc0742cb855715e95d36ca4831\transformed\lifecycle-livedata-core-ktx-2.7.0\res
+com.example.paytag.app-emoji2-views-helper-1.2.0-34 C:\Users\harig\.gradle\caches\transforms-3\e4651e135791e7b173462990da7e357d\transformed\emoji2-views-helper-1.2.0\res
+com.example.paytag.app-pngs-35 C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\build\generated\res\pngs\release
+com.example.paytag.app-resValues-36 C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\build\generated\res\resValues\release
+com.example.paytag.app-packageReleaseResources-37 C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\build\intermediates\incremental\release\packageReleaseResources\merged.dir
+com.example.paytag.app-packageReleaseResources-38 C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\build\intermediates\incremental\release\packageReleaseResources\stripped.dir
+com.example.paytag.app-merged_res-39 C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\build\intermediates\merged_res\release
+com.example.paytag.app-main-40 C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\main\res
+com.example.paytag.app-release-41 C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app\src\release\res

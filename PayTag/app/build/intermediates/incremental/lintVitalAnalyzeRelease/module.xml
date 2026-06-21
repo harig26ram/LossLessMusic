@@ -1,0 +1,19 @@
+<lint-module
+    format="1"
+    dir="C:\Users\harig\OneDrive\Documents\Test API\code check\PayTag\app"
+    name=":app"
+    type="APP"
+    maven="PayTag:app:"
+    agpVersion="8.1.0"
+    buildFolder="build"
+    bootClassPath="C:\Users\harig\android-sdk\platforms\android-35\android.jar;C:\Users\harig\android-sdk\build-tools\33.0.1\core-lambda-stubs.jar"
+    javaSourceLevel="1.8"
+    compileTarget="android-35"
+    neverShrinking="true">
+  <lintOptions
+      abortOnError="true"
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true"/>
+  <variant name="release"/>
+</lint-module>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Background circle with gradient -->
+    <path
+        android:fillColor="#6C3CE1"
+        android:pathData="M54,54m-40,0a40,40 0,1 1,80 0a40,40 0,1 1,-80 0"/>
+    
+    <!-- House body -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M35,55L35,72L73,72L73,55L54,40L35,55Z"/>
+    
+    <!-- House roof -->
+    <path
+        android:fillColor="#E94E7A"
+        android:pathData="M30,57L54,36L78,57L54,52L30,57Z"/>
+    
+    <!-- Door -->
+    <path
+        android:fillColor="#2D1B69"
+        android:pathData="M48,60L48,72L60,72L60,60L54,55L48,60Z"/>
+    
+    <!-- Window left -->
+    <path
+        android:fillColor="#4ECDC4"
+        android:pathData="M38,58L44,58L44,64L38,64L38,58Z"/>
+    
+    <!-- Window right -->
+    <path
+        android:fillColor="#4ECDC4"
+        android:pathData="M64,58L70,58L70,64L64,64L64,58Z"/>
+    
+    <!-- Rupee symbol on roof -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M51,46L57,46L55,50L58,50C59.5,50 61,51 61,52.5C61,54 60,55 58.5,55L56,55L56,58L53,58L53,55L51,55L51,46ZM54,47.5L53.5,49L55.5,49L54,47.5ZM54.5,53.5L53.5,53.5L53.5,52L54.5,52C55.3,52 56,52.5 56,53C56,53.5 55.3,53.5 54.5,53.5Z"/>
+    
+</vector>

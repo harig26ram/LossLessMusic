@@ -1,0 +1,178 @@
+[
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_ic_category_entertainment.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/ic_category_entertainment.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/layout_tag_dialog.xml.flat",
+        "source": "com.example.paytag.app-main-40:/layout/tag_dialog.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.example.paytag.app-main-40:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/menu_main_menu.xml.flat",
+        "source": "com.example.paytag.app-main-40:/menu/main_menu.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_ic_calendar.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/ic_calendar.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/anim_coin_pop.xml.flat",
+        "source": "com.example.paytag.app-main-40:/anim/coin_pop.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_category_tag_bg.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/category_tag_bg.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/layout_widget_paytag.xml.flat",
+        "source": "com.example.paytag.app-main-40:/layout/widget_paytag.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_ic_category_transport.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/ic_category_transport.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/xml_paytag_widget_info.xml.flat",
+        "source": "com.example.paytag.app-main-40:/xml/paytag_widget_info.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_ic_search.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/ic_search.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_ic_add.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/ic_add.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/layout_widget_add_popup.xml.flat",
+        "source": "com.example.paytag.app-main-40:/layout/widget_add_popup.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_ic_category_bill.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/ic_category_bill.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_ic_category_health.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/ic_category_health.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_ic_category_food.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/ic_category_food.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_card_gradient.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/card_gradient.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_gradient_header.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/gradient_header.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/anim_fade_scale_in.xml.flat",
+        "source": "com.example.paytag.app-main-40:/anim/fade_scale_in.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_ic_next.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/ic_next.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/layout_activity_calendar.xml.flat",
+        "source": "com.example.paytag.app-main-40:/layout/activity_calendar.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/layout_activity_charts.xml.flat",
+        "source": "com.example.paytag.app-main-40:/layout/activity_charts.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_ic_delete.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/ic_delete.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/anim_slide_up.xml.flat",
+        "source": "com.example.paytag.app-main-40:/anim/slide_up.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_ic_prev.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/ic_prev.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_widget_background.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/widget_background.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/layout_item_category_group.xml.flat",
+        "source": "com.example.paytag.app-main-40:/layout/item_category_group.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/layout_activity_main.xml.flat",
+        "source": "com.example.paytag.app-main-40:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_ic_export.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/ic_export.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/layout_item_expense.xml.flat",
+        "source": "com.example.paytag.app-main-40:/layout/item_expense.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/layout_activity_group.xml.flat",
+        "source": "com.example.paytag.app-main-40:/layout/activity_group.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_ic_share.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/ic_share.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_widget_add_bg.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/widget_add_bg.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_ic_edit.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/ic_edit.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/layout_item_category.xml.flat",
+        "source": "com.example.paytag.app-main-40:/layout/item_category.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_spinner_bg.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/spinner_bg.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_circle_dot.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/circle_dot.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/xml_file_paths.xml.flat",
+        "source": "com.example.paytag.app-main-40:/xml/file_paths.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_ic_category_shopping.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/ic_category_shopping.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_ic_chart.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/ic_chart.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/layout_activity_login.xml.flat",
+        "source": "com.example.paytag.app-main-40:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_ic_category_education.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/ic_category_education.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-merged_res-39:/drawable_item_expense_bg.xml.flat",
+        "source": "com.example.paytag.app-main-40:/drawable/item_expense_bg.xml"
+    }
+]

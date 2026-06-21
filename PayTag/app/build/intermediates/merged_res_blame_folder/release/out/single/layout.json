@@ -1,0 +1,46 @@
+[
+    {
+        "merged": "com.example.paytag.app-mergeReleaseResources-38:/layout/item_expense.xml",
+        "source": "com.example.paytag.app-main-40:/layout/item_expense.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-mergeReleaseResources-38:/layout/activity_login.xml",
+        "source": "com.example.paytag.app-main-40:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-mergeReleaseResources-38:/layout/activity_group.xml",
+        "source": "com.example.paytag.app-main-40:/layout/activity_group.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-mergeReleaseResources-38:/layout/item_category.xml",
+        "source": "com.example.paytag.app-main-40:/layout/item_category.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-mergeReleaseResources-38:/layout/activity_charts.xml",
+        "source": "com.example.paytag.app-main-40:/layout/activity_charts.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-mergeReleaseResources-38:/layout/activity_calendar.xml",
+        "source": "com.example.paytag.app-main-40:/layout/activity_calendar.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-mergeReleaseResources-38:/layout/item_category_group.xml",
+        "source": "com.example.paytag.app-main-40:/layout/item_category_group.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-mergeReleaseResources-38:/layout/activity_main.xml",
+        "source": "com.example.paytag.app-main-40:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-mergeReleaseResources-38:/layout/widget_paytag.xml",
+        "source": "com.example.paytag.app-main-40:/layout/widget_paytag.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-mergeReleaseResources-38:/layout/tag_dialog.xml",
+        "source": "com.example.paytag.app-main-40:/layout/tag_dialog.xml"
+    },
+    {
+        "merged": "com.example.paytag.app-mergeReleaseResources-38:/layout/widget_add_popup.xml",
+        "source": "com.example.paytag.app-main-40:/layout/widget_add_popup.xml"
+    }
+]

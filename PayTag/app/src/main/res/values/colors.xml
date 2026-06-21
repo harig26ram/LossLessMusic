@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Trackizer-inspired Dark Theme Palette -->
+    <color name="background_dark">#0A0A0F</color>
+    <color name="surface_dark">#141420</color>
+    <color name="surface_card">#1A1A2E</color>
+    <color name="surface_elevated">#222236</color>
+    
+    <!-- Gradient Colors -->
+    <color name="gradient_start">#2D1B69</color>
+    <color name="gradient_mid">#6C3CE1</color>
+    <color name="gradient_end">#B04AE8</color>
+    
+    <!-- Primary Accent -->
+    <color name="primary">#6C3CE1</color>
+    <color name="primary_light">#9B6AFF</color>
+    <color name="primary_dark">#4A1DB5</color>
+    
+    <!-- Secondary Accent -->
+    <color name="secondary">#E94E7A</color>
+    <color name="secondary_light">#FF7BA3</color>
+    
+    <!-- Tertiary Accent -->
+    <color name="tertiary">#FFB547</color>
+    <color name="tertiary_light">#FFD280</color>
+    
+    <!-- Success -->
+    <color name="success">#00D68F</color>
+    <color name="success_light">#7AFFC8</color>
+    
+    <!-- Warning -->
+    <color name="warning">#FFB547</color>
+    
+    <!-- Error/Danger -->
+    <color name="danger">#FF4D6A</color>
+    
+    <!-- Text Colors -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B8B8CC</color>
+    <color name="text_hint">#6C6C80</color>
+    
+    <!-- Border -->
+    <color name="border">#2A2A3E</color>
+    <color name="border_light">#3A3A50</color>
+    
+    <!-- Category Colors -->
+    <color name="cat_food">#FF6B6B</color>
+    <color name="cat_transport">#4ECDC4</color>
+    <color name="cat_bill">#6C3CE1</color>
+    <color name="cat_entertainment">#FFD93D</color>
+    <color name="cat_shopping">#A855F7</color>
+    <color name="cat_health">#00D68F</color>
+    <color name="cat_education">#4DABF7</color>
+    <color name="cat_other">#6C6C80</color>
+    
+    <!-- Old names for compatibility -->
+    <color name="purple_500">#6C3CE1</color>
+    <color name="purple_700">#4A1DB5</color>
+    <color name="teal_200">#C4B5FD</color>
+    <color name="teal_700">#8B5CF6</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="bg_light">#0A0A0F</color>
+    <color name="card_white">#1A1A2E</color>
+    <color name="text_primary_color">#FFFFFF</color>
+    <color name="text_secondary_color">#B8B8CC</color>
+    <color name="text_hint_color">#6C6C80</color>
+    
+    <color name="accent_cyan">#4ECDC4</color>
+    <color name="accent_blue">#4DABF7</color>
+    <color name="deep_purple">#2D1B69</color>
+    <color name="vibrant_purple">#A855F7</color>
+    
+    <color name="expense_red">#FF4D6A</color>
+    <color name="surface_warm">#0A0A0F</color>
+    <color name="border_light_color">#2A2A3E</color>
+</resources>
