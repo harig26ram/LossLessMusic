@@ -1,9 +1,7 @@
 package com.losslessmusic.ui.subscriptions;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,9 +15,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.losslessmusic.adapters.ServiceAdapter;
-import com.losslessmusic.audio.InternetArchiveProvider;
-import com.losslessmusic.audio.JioSaavnProvider;
-import com.losslessmusic.audio.YouTubeProvider;
 import com.losslessmusic.databinding.FragmentSubscriptionsBinding;
 import com.losslessmusic.models.SubscriptionConfig;
 

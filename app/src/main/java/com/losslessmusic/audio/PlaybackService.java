@@ -4,13 +4,9 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.media.session.MediaSessionCompat;
-
-import androidx.annotation.Nullable;
-import androidx.core.app.NotificationCompat;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -23,7 +19,6 @@ import androidx.media3.datasource.okhttp.OkHttpDataSource;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.source.ProgressiveMediaSource;
 
-import com.google.gson.Gson;
 import com.losslessmusic.LossLessApp;
 import com.losslessmusic.MainActivity;
 import com.losslessmusic.R;
@@ -50,7 +45,6 @@ public class PlaybackService extends Service {
     private final IBinder binder = new LocalBinder();
     private List<Song> playlist = new ArrayList<>();
     private int currentIndex = 0;
-    private final Gson gson = new Gson();
 
     private Player.Listener playerListener;
 
@@ -144,14 +138,10 @@ public class PlaybackService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null && intent.getAction() != null) {
             if (intent.hasExtra("songs")) {
-                Object songsObj = intent.getSerializableExtra("songs");
-                if (songsObj instanceof ArrayList) {
-                    @SuppressWarnings("unchecked")
-                    ArrayList<Song> songs = (ArrayList<Song>) songsObj;
+                ArrayList<Song> songs = intent.getParcelableArrayListExtra("songs");
+                if (songs != null && !songs.isEmpty()) {
                     int startIndex = intent.getIntExtra("startIndex", 0);
-                    if (!songs.isEmpty()) {
-                        playQueue(songs, startIndex);
-                    }
+                    playQueue(songs, startIndex);
                 }
             }
             switch (intent.getAction()) {

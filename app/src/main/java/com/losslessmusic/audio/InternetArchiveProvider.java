@@ -8,13 +8,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.losslessmusic.models.Song;
 
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -33,11 +32,11 @@ public class InternetArchiveProvider implements AudioSourceProvider {
 
     public InternetArchiveProvider() {
         client = new OkHttpClient.Builder()
-                .connectTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
-                .readTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(15, TimeUnit.SECONDS)
                 .build();
         gson = new Gson();
-        executor = Executors.newFixedThreadPool(2);
+        executor = Executors.newSingleThreadExecutor();
         mainHandler = new Handler(Looper.getMainLooper());
     }
 
@@ -54,7 +53,7 @@ public class InternetArchiveProvider implements AudioSourceProvider {
     public boolean isPremiumRequired() { return false; }
 
     @Override
-    public Song.AudioQuality getMaxQuality() { return Song.AudioQuality.LOSSLESS_24; }
+    public Song.AudioQuality getMaxQuality() { return Song.AudioQuality.LOSSLESS_16; }
 
     @Override
     public void search(String query, SearchResultCallback callback) {
@@ -63,8 +62,8 @@ public class InternetArchiveProvider implements AudioSourceProvider {
                 String encoded = URLEncoder.encode(query, "UTF-8");
                 String url = SEARCH_URL +
                         "?q=" + encoded +
-                        "&fl[]=identifier,title,creator,item_size" +
-                        "&rows=20&output=json" +
+                        "&fl[]=identifier,title,creator" +
+                        "&rows=15&output=json" +
                         "&mediatype=audio" +
                         "&sort[]=downloads+desc";
 
@@ -77,13 +76,13 @@ public class InternetArchiveProvider implements AudioSourceProvider {
                     if (response.isSuccessful() && response.body() != null) {
                         String body = response.body().string();
                         List<Song> songs = parseSearchResults(body);
-                        resolveStreamUrls(songs, callback);
+                        mainHandler.post(() -> callback.onResults(songs));
                     } else {
                         mainHandler.post(() -> callback.onError("Search failed: " + response.code()));
                     }
                 }
             } catch (Exception e) {
-                mainHandler.post(() -> callback.onError(e.getMessage()));
+                mainHandler.post(() -> callback.onError("Archive: " + e.getMessage()));
             }
         });
     }
@@ -119,8 +118,8 @@ public class InternetArchiveProvider implements AudioSourceProvider {
             try {
                 String url = SEARCH_URL +
                         "?q=mediatype%3Aaudio+AND+subject%3Amusic" +
-                        "&fl[]=identifier,title,creator,item_size" +
-                        "&sort[]=downloads+desc&rows=30&output=json";
+                        "&fl[]=identifier,title,creator" +
+                        "&sort[]=downloads+desc&rows=20&output=json";
 
                 Request request = new Request.Builder()
                         .url(url)
@@ -131,66 +130,32 @@ public class InternetArchiveProvider implements AudioSourceProvider {
                     if (response.isSuccessful() && response.body() != null) {
                         String body = response.body().string();
                         List<Song> songs = parseSearchResults(body);
-                        resolveStreamUrlsForTrending(songs, callback);
+
+                        // Try to get stream URLs for first 3 items only (to avoid timeout)
+                        resolveFewStreamUrls(songs, 3, callback);
                     } else {
                         mainHandler.post(() -> callback.onError("Failed: " + response.code()));
                     }
                 }
             } catch (Exception e) {
-                mainHandler.post(() -> callback.onError(e.getMessage()));
+                mainHandler.post(() -> callback.onError("Archive: " + e.getMessage()));
             }
         });
     }
 
-    private List<Song> parseSearchResults(String json) {
-        List<Song> songs = new ArrayList<>();
-        try {
-            JsonObject response = gson.fromJson(json, JsonObject.class);
-            JsonArray docs = response.getAsJsonObject("response").getAsJsonArray("docs");
-
-            if (docs != null) {
-                for (int i = 0; i < docs.size(); i++) {
-                    JsonObject doc = docs.get(i).getAsJsonObject();
-                    String identifier = doc.get("identifier").getAsString();
-                    String title = doc.has("title") ? doc.get("title").getAsString() : "Unknown";
-                    String creator = doc.has("creator") ? doc.get("creator").getAsString() : "Unknown";
-
-                    Song song = new Song(identifier, title, creator);
-                    song.setSource(Song.AudioSource.INTERNET_ARCHIVE);
-                    song.setQuality(Song.AudioQuality.UNKNOWN);
-                    songs.add(song);
-                }
-            }
-        } catch (Exception e) {
-            // JSON parse error
-        }
-        return songs;
-    }
-
-    private void resolveStreamUrls(List<Song> songs, SearchResultCallback callback) {
-        if (songs.isEmpty()) {
-            mainHandler.post(() -> callback.onResults(songs));
-            return;
-        }
-
-        List<Song> resolved = new ArrayList<>();
-        AtomicInteger remaining = new AtomicInteger(songs.size());
-
-        for (Song song : songs) {
-            resolveSingleItem(song, resolved, remaining, callback);
-        }
-    }
-
-    private void resolveStreamUrlsForTrending(List<Song> songs, TrendingCallback callback) {
+    private void resolveFewStreamUrls(List<Song> songs, int maxResolve, TrendingCallback callback) {
         if (songs.isEmpty()) {
             mainHandler.post(() -> callback.onResults(songs, "Trending Music"));
             return;
         }
 
-        List<Song> resolved = new ArrayList<>();
-        AtomicInteger remaining = new AtomicInteger(songs.size());
+        int toResolve = Math.min(maxResolve, songs.size());
+        List<Song> resolved = new ArrayList<>(songs);
+        java.util.concurrent.atomic.AtomicInteger remaining = new java.util.concurrent.atomic.AtomicInteger(toResolve);
 
-        for (Song song : songs) {
+        for (int i = 0; i < toResolve; i++) {
+            final Song song = songs.get(i);
+            final int index = i;
             executor.execute(() -> {
                 try {
                     String url = METADATA_URL + song.getId();
@@ -205,9 +170,7 @@ public class InternetArchiveProvider implements AudioSourceProvider {
                             List<Song> tracks = parseMetadataFiles(body, song.getId());
                             if (!tracks.isEmpty()) {
                                 Song best = pickBestTrack(tracks);
-                                synchronized (resolved) {
-                                    resolved.add(best);
-                                }
+                                resolved.set(index, best);
                             }
                         }
                     }
@@ -218,97 +181,105 @@ public class InternetArchiveProvider implements AudioSourceProvider {
                 }
             });
         }
+
+        // Safety timeout - if resolution takes too long, return what we have
+        mainHandler.postDelayed(() -> {
+            if (remaining.get() > 0) {
+                callback.onResults(resolved, "Trending Music");
+            }
+        }, 8000);
     }
 
-    private void resolveSingleItem(Song song, List<Song> resolved,
-                                    AtomicInteger remaining, SearchResultCallback callback) {
-        executor.execute(() -> {
-            try {
-                String url = METADATA_URL + song.getId();
-                Request request = new Request.Builder()
-                        .url(url)
-                        .addHeader("User-Agent", "LossLessMusic/1.0")
-                        .build();
+    private List<Song> parseSearchResults(String json) {
+        List<Song> songs = new ArrayList<>();
+        try {
+            JsonObject response = gson.fromJson(json, JsonObject.class);
+            if (response == null) return songs;
 
-                try (Response response = client.newCall(request).execute()) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        String body = response.body().string();
-                        List<Song> tracks = parseMetadataFiles(body, song.getId());
-                        if (!tracks.isEmpty()) {
-                            Song best = pickBestTrack(tracks);
-                            synchronized (resolved) {
-                                resolved.add(best);
-                            }
-                        }
-                    }
-                }
-            } catch (Exception ignored) {}
+            JsonObject responseObject = response.getAsJsonObject("response");
+            if (responseObject == null) return songs;
 
-            if (remaining.decrementAndGet() == 0) {
-                mainHandler.post(() -> callback.onResults(resolved));
+            JsonArray docs = responseObject.getAsJsonArray("docs");
+            if (docs == null) return songs;
+
+            for (int i = 0; i < docs.size(); i++) {
+                try {
+                    JsonObject doc = docs.get(i).getAsJsonObject();
+                    String identifier = doc.get("identifier").getAsString();
+                    String title = doc.has("title") ? doc.get("title").getAsString() : "Unknown";
+                    String creator = doc.has("creator") ? doc.get("creator").getAsString() : "Unknown";
+
+                    Song song = new Song(identifier, title, creator);
+                    song.setSource(Song.AudioSource.INTERNET_ARCHIVE);
+                    song.setQuality(Song.AudioQuality.UNKNOWN);
+                    songs.add(song);
+                } catch (Exception ignored) {}
             }
-        });
+        } catch (Exception ignored) {}
+        return songs;
     }
 
     private List<Song> parseMetadataFiles(String json, String identifier) {
         List<Song> songs = new ArrayList<>();
         try {
             JsonObject root = gson.fromJson(json, JsonObject.class);
+            if (root == null) return songs;
+
             JsonObject metadata = root.has("metadata") ? root.getAsJsonObject("metadata") : null;
             JsonArray files = root.getAsJsonArray("files");
 
-            String title = metadata != null && metadata.has("title") ?
-                    metadata.get("title").getAsString() : identifier;
-            String creator = metadata != null && metadata.has("creator") ?
-                    metadata.get("creator").getAsString() : "Unknown";
+            String title = identifier;
+            String creator = "Unknown";
+            if (metadata != null) {
+                if (metadata.has("title")) title = metadata.get("title").getAsString();
+                if (metadata.has("creator")) creator = metadata.get("creator").getAsString();
+            }
 
             if (files != null) {
                 for (int i = 0; i < files.size(); i++) {
-                    JsonObject file = files.get(i).getAsJsonObject();
-                    String name = file.has("name") ? file.get("name").getAsString() : "";
-                    String format = file.has("format") ? file.get("format").getAsString() : "";
+                    try {
+                        JsonObject file = files.get(i).getAsJsonObject();
+                        String name = file.has("name") ? file.get("name").getAsString() : "";
+                        String format = file.has("format") ? file.get("format").getAsString() : "";
 
-                    boolean isAudio = name.endsWith(".flac") || name.endsWith(".mp3")
-                            || name.endsWith(".ogg") || name.endsWith(".wav")
-                            || name.endsWith(".m4a") || name.endsWith(".aac")
-                            || format.contains("VBR") || format.contains("MP3")
-                            || format.contains(" FLAC") || format.contains("Ogg Vorbis");
+                        boolean isAudio = name.endsWith(".flac") || name.endsWith(".mp3")
+                                || name.endsWith(".ogg") || name.endsWith(".wav")
+                                || name.endsWith(".m4a") || name.endsWith(".aac")
+                                || format.contains("VBR MP3") || format.contains("MP3")
+                                || format.contains(" FLAC") || format.contains("Ogg Vorbis");
 
-                    if (isAudio) {
-                        Song song = new Song(identifier + "/" + name, title, creator);
-                        song.setSource(Song.AudioSource.INTERNET_ARCHIVE);
-                        song.setStreamUrl(DOWNLOAD_URL + identifier + "/" +
-                                URLEncoder.encode(name, "UTF-8"));
+                        if (isAudio) {
+                            Song song = new Song(identifier + "/" + name, title, creator);
+                            song.setSource(Song.AudioSource.INTERNET_ARCHIVE);
+                            song.setStreamUrl(DOWNLOAD_URL + identifier + "/" +
+                                    URLEncoder.encode(name, "UTF-8"));
 
-                        if (name.endsWith(".flac") || format.contains(" FLAC")) {
-                            song.setQuality(Song.AudioQuality.LOSSLESS_16);
-                        } else if (name.endsWith(".wav")) {
-                            song.setQuality(Song.AudioQuality.LOSSLESS_24);
-                        } else if (name.endsWith(".mp3") || format.contains("MP3")) {
-                            song.setQuality(Song.AudioQuality.HIGH_320);
-                        } else {
-                            song.setQuality(Song.AudioQuality.MEDIUM_256);
+                            if (name.endsWith(".flac") || format.contains(" FLAC")) {
+                                song.setQuality(Song.AudioQuality.LOSSLESS_16);
+                            } else if (name.endsWith(".wav")) {
+                                song.setQuality(Song.AudioQuality.LOSSLESS_24);
+                            } else if (name.endsWith(".mp3") || format.contains("MP3")) {
+                                song.setQuality(Song.AudioQuality.HIGH_320);
+                            } else {
+                                song.setQuality(Song.AudioQuality.MEDIUM_256);
+                            }
+
+                            songs.add(song);
                         }
-
-                        String sizeStr = file.has("size") ? file.get("size").getAsString() : "0";
-                        try {
-                            song.setDurationMs(Long.parseLong(sizeStr) / 16000 * 1000);
-                        } catch (NumberFormatException ignored) {}
-
-                        songs.add(song);
-                    }
+                    } catch (Exception ignored) {}
                 }
             }
-        } catch (Exception e) {
-            // JSON parse error
-        }
+        } catch (Exception ignored) {}
         return songs;
     }
 
     private Song pickBestTrack(List<Song> tracks) {
-        return tracks.stream()
-                .max((a, b) -> Integer.compare(
-                        a.getQuality().getRank(), b.getQuality().getRank()))
-                .orElse(tracks.get(0));
+        Song best = tracks.get(0);
+        for (Song s : tracks) {
+            if (s.getQuality().getRank() > best.getQuality().getRank()) {
+                best = s;
+            }
+        }
+        return best;
     }
 }

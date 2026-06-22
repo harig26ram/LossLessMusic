@@ -16,7 +16,6 @@ import com.losslessmusic.adapters.SongAdapter;
 import com.losslessmusic.audio.AudioSourceProvider;
 import com.losslessmusic.audio.InternetArchiveProvider;
 import com.losslessmusic.audio.LocalFileProvider;
-import com.losslessmusic.audio.QualityResolver;
 import com.losslessmusic.databinding.FragmentHomeBinding;
 import com.losslessmusic.models.Song;
 import com.losslessmusic.ui.player.PlayerActivity;
@@ -31,8 +30,6 @@ public class HomeFragment extends Fragment {
     private SongAdapter searchAdapter;
     private LocalFileProvider localProvider;
     private InternetArchiveProvider archiveProvider;
-    private QualityResolver qualityResolver;
-    private boolean showingSearch = false;
 
     @Nullable
     @Override
@@ -49,10 +46,6 @@ public class HomeFragment extends Fragment {
         localProvider = new LocalFileProvider(requireContext());
         archiveProvider = new InternetArchiveProvider();
 
-        qualityResolver = new QualityResolver();
-        qualityResolver.registerProvider(localProvider);
-        qualityResolver.registerProvider(archiveProvider);
-
         setupTrending();
         setupSearch();
         loadTrending();
@@ -66,7 +59,7 @@ public class HomeFragment extends Fragment {
         trendingAdapter.setOnSongClickListener(new SongAdapter.OnSongClickListener() {
             @Override
             public void onSongClick(Song song, int position) {
-                playSongWithBestQuality(song, trendingAdapter.getCurrentList());
+                playSong(song, trendingAdapter.getCurrentList());
             }
 
             @Override
@@ -82,7 +75,7 @@ public class HomeFragment extends Fragment {
         searchAdapter.setOnSongClickListener(new SongAdapter.OnSongClickListener() {
             @Override
             public void onSongClick(Song song, int position) {
-                playSongWithBestQuality(song, searchAdapter.getCurrentList());
+                playSong(song, searchAdapter.getCurrentList());
             }
 
             @Override
@@ -98,7 +91,6 @@ public class HomeFragment extends Fragment {
                 if (s.length() >= 2) {
                     performSearch(s.toString());
                 } else if (s.length() == 0) {
-                    showingSearch = false;
                     binding.trendingSection.setVisibility(View.VISIBLE);
                     binding.searchResultsSection.setVisibility(View.GONE);
                 }
@@ -109,13 +101,13 @@ public class HomeFragment extends Fragment {
         });
 
         binding.searchBar.setOnClickListener(v -> {
-            showingSearch = !showingSearch;
-            if (showingSearch) {
-                binding.trendingSection.setVisibility(View.GONE);
-                binding.searchResultsSection.setVisibility(View.VISIBLE);
-            } else {
+            boolean showing = binding.searchResultsSection.getVisibility() == View.VISIBLE;
+            if (showing) {
                 binding.trendingSection.setVisibility(View.VISIBLE);
                 binding.searchResultsSection.setVisibility(View.GONE);
+            } else {
+                binding.trendingSection.setVisibility(View.GONE);
+                binding.searchResultsSection.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -124,40 +116,37 @@ public class HomeFragment extends Fragment {
         binding.progressBar.setVisibility(View.VISIBLE);
         binding.emptyState.setVisibility(View.GONE);
 
-        List<Song> allSongs = new ArrayList<>();
-
-        // First load local files (fast, synchronous)
-        localProvider.getTrending(new AudioSourceProvider.TrendingCallback() {
-            @Override
-            public void onResults(List<Song> songs, String category) {
-                allSongs.addAll(songs);
-                if (binding != null) {
-                    trendingAdapter.submitList(new ArrayList<>(allSongs));
-                    binding.progressBar.setVisibility(View.GONE);
+        // Load local files first (fast, synchronous)
+        List<Song> localSongs = new ArrayList<>();
+        try {
+            localProvider.getTrending(new AudioSourceProvider.TrendingCallback() {
+                @Override
+                public void onResults(List<Song> songs, String category) {
+                    localSongs.addAll(songs);
                 }
-                // Then load from Internet Archive (async, slower)
-                loadArchiveTrending(allSongs);
-            }
 
-            @Override
-            public void onError(String message) {
-                loadArchiveTrending(allSongs);
-            }
-        });
-    }
+                @Override
+                public void onError(String message) {}
+            });
+        } catch (Exception ignored) {}
 
-    private void loadArchiveTrending(List<Song> existing) {
+        if (!localSongs.isEmpty()) {
+            trendingAdapter.submitList(new ArrayList<>(localSongs));
+        }
+
+        // Then load from Internet Archive
         archiveProvider.getTrending(new AudioSourceProvider.TrendingCallback() {
             @Override
             public void onResults(List<Song> songs, String category) {
                 if (binding != null) {
                     binding.progressBar.setVisibility(View.GONE);
-                    if (songs.isEmpty() && existing.isEmpty()) {
+                    List<Song> combined = new ArrayList<>(localSongs);
+                    combined.addAll(songs);
+                    if (combined.isEmpty()) {
                         binding.emptyState.setVisibility(View.VISIBLE);
                     } else {
                         binding.emptyState.setVisibility(View.GONE);
-                        existing.addAll(songs);
-                        trendingAdapter.submitList(new ArrayList<>(existing));
+                        trendingAdapter.submitList(combined);
                     }
                 }
             }
@@ -166,10 +155,10 @@ public class HomeFragment extends Fragment {
             public void onError(String message) {
                 if (binding != null) {
                     binding.progressBar.setVisibility(View.GONE);
-                    if (existing.isEmpty()) {
+                    if (localSongs.isEmpty()) {
                         binding.emptyState.setVisibility(View.VISIBLE);
                     } else {
-                        trendingAdapter.submitList(new ArrayList<>(existing));
+                        trendingAdapter.submitList(new ArrayList<>(localSongs));
                     }
                 }
             }
@@ -178,75 +167,55 @@ public class HomeFragment extends Fragment {
 
     private void performSearch(String query) {
         binding.searchProgress.setVisibility(View.VISIBLE);
-        List<Song> results = new ArrayList<>();
 
         archiveProvider.search(query, new AudioSourceProvider.SearchResultCallback() {
             @Override
             public void onResults(List<Song> songs) {
-                results.addAll(songs);
-                localProvider.search(query, new AudioSourceProvider.SearchResultCallback() {
-                    @Override
-                    public void onResults(List<Song> localSongs) {
-                        results.addAll(0, localSongs);
-                        if (binding != null) {
-                            binding.searchProgress.setVisibility(View.GONE);
-                            if (results.isEmpty()) {
-                                Toast.makeText(requireContext(), "No results found", Toast.LENGTH_SHORT).show();
-                            }
-                            searchAdapter.submitList(results);
+                // Also search local files
+                List<Song> localResults = new ArrayList<>();
+                try {
+                    localProvider.search(query, new AudioSourceProvider.SearchResultCallback() {
+                        @Override
+                        public void onResults(List<Song> localSongs) {
+                            localResults.addAll(localSongs);
                         }
-                    }
 
-                    @Override
-                    public void onError(String message) {
-                        if (binding != null) {
-                            binding.searchProgress.setVisibility(View.GONE);
-                            searchAdapter.submitList(results);
-                        }
+                        @Override
+                        public void onError(String message) {}
+                    });
+                } catch (Exception ignored) {}
+
+                if (binding != null) {
+                    binding.searchProgress.setVisibility(View.GONE);
+                    List<Song> combined = new ArrayList<>(localResults);
+                    combined.addAll(songs);
+                    if (combined.isEmpty()) {
+                        Toast.makeText(requireContext(), "No results found", Toast.LENGTH_SHORT).show();
                     }
-                });
+                    searchAdapter.submitList(combined);
+                }
             }
 
             @Override
             public void onError(String message) {
-                localProvider.search(query, new AudioSourceProvider.SearchResultCallback() {
-                    @Override
-                    public void onResults(List<Song> localSongs) {
-                        if (binding != null) {
-                            binding.searchProgress.setVisibility(View.GONE);
-                            searchAdapter.submitList(localSongs);
+                // Archive failed, try local only
+                List<Song> localResults = new ArrayList<>();
+                try {
+                    localProvider.search(query, new AudioSourceProvider.SearchResultCallback() {
+                        @Override
+                        public void onResults(List<Song> localSongs) {
+                            localResults.addAll(localSongs);
                         }
-                    }
 
-                    @Override
-                    public void onError(String message2) {
-                        if (binding != null) {
-                            binding.searchProgress.setVisibility(View.GONE);
-                        }
-                    }
-                });
-            }
-        });
-    }
+                        @Override
+                        public void onError(String message2) {}
+                    });
+                } catch (Exception ignored) {}
 
-    private void playSongWithBestQuality(Song song, List<Song> queue) {
-        if (song.getStreamUrl() != null || song.getLocalUri() != null) {
-            playSong(song, queue);
-            return;
-        }
-
-        Toast.makeText(requireContext(), "Resolving best quality...", Toast.LENGTH_SHORT).show();
-
-        qualityResolver.resolveBestSource(song, resolved -> {
-            if (resolved != null) {
-                song.setStreamUrl(resolved.streamUrl);
-                song.setSource(resolved.provider);
-                song.setQuality(resolved.quality);
-                playSong(song, queue);
-            } else {
-                Toast.makeText(requireContext(),
-                        "No playable source found for: " + song.getTitle(),
-                        Toast.LENGTH_SHORT).show();
+                if (binding != null) {
+                    binding.searchProgress.setVisibility(View.GONE);
+                    searchAdapter.submitList(localResults);
+                }
             }
         });
     }
@@ -265,7 +234,7 @@ public class HomeFragment extends Fragment {
         }
 
         ArrayList<Song> songList = new ArrayList<>(queue);
-        serviceIntent.putExtra("songs", songList);
+        serviceIntent.putParcelableArrayListExtra("songs", songList);
         serviceIntent.putExtra("startIndex", startIndex);
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {

@@ -1,10 +1,10 @@
 package com.losslessmusic.models;
 
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-import java.io.Serializable;
-
-public class Song implements Serializable {
+public class Song implements Parcelable {
     private String id;
     private String title;
     private String artist;
@@ -54,6 +54,54 @@ public class Song implements Serializable {
         this.artist = artist;
         this.quality = AudioQuality.UNKNOWN;
         this.source = AudioSource.UNKNOWN;
+    }
+
+    protected Song(Parcel in) {
+        id = in.readString();
+        title = in.readString();
+        artist = in.readString();
+        album = in.readString();
+        durationMs = in.readLong();
+        artworkUrl = in.readString();
+        localUri = in.readParcelable(Uri.class.getClassLoader());
+        source = AudioSource.valueOf(in.readString());
+        quality = AudioQuality.valueOf(in.readString());
+        streamUrl = in.readString();
+        albumId = in.readString();
+        isrc = in.readString();
+    }
+
+    public static final Creator<Song> CREATOR = new Creator<Song>() {
+        @Override
+        public Song createFromParcel(Parcel in) {
+            return new Song(in);
+        }
+
+        @Override
+        public Song[] newArray(int size) {
+            return new Song[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(title);
+        dest.writeString(artist);
+        dest.writeString(album);
+        dest.writeLong(durationMs);
+        dest.writeString(artworkUrl);
+        dest.writeParcelable(localUri, flags);
+        dest.writeString(source.name());
+        dest.writeString(quality.name());
+        dest.writeString(streamUrl);
+        dest.writeString(albumId);
+        dest.writeString(isrc);
     }
 
     public String getId() { return id; }
