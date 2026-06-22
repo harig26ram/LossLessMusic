@@ -74,7 +74,7 @@ public class SubscriptionsFragment extends Fragment {
         services.add(jiosaavn);
 
         SubscriptionConfig youtube = new SubscriptionConfig(SubscriptionConfig.ServiceType.YOUTUBE_MUSIC);
-        youtube.setLinked(prefs.getBoolean(KEY_YOUTUBE, false));
+        youtube.setEnabled(false);
         services.add(youtube);
 
         adapter.setServices(services);
@@ -90,11 +90,10 @@ public class SubscriptionsFragment extends Fragment {
                 }
                 break;
             case YOUTUBE_MUSIC:
-                if (enable) {
-                    linkYouTube(service);
-                } else {
-                    unlinkService(service, KEY_YOUTUBE);
-                }
+                Toast.makeText(requireContext(),
+                        "YouTube Music is temporarily unavailable. All public API instances are currently down.",
+                        Toast.LENGTH_LONG).show();
+                adapter.notifyDataSetChanged();
                 break;
             case LOCAL:
             case INTERNET_ARCHIVE:
@@ -115,13 +114,13 @@ public class SubscriptionsFragment extends Fragment {
     private void linkJioSaavn(SubscriptionConfig service) {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Connect JioSaavn")
-                .setMessage("JioSaavn provides free access to 80M+ songs in high quality (up to 320kbps AAC).\n\n" +
-                        "No login required - the app uses JioSaavn's public API.\n\n" +
+                .setMessage("JioSaavn provides access to 80M+ songs with free preview clips.\n\n" +
+                        "No login required - uses JioSaavn's public API.\n\n" +
                         "Features:\n" +
                         "- Search all JioSaavn catalog\n" +
-                        "- Stream up to 320kbps\n" +
-                        "- Access to playlists and albums\n" +
-                        "- Tamil, Hindi, English & regional languages")
+                        "- Stream 30-second preview clips\n" +
+                        "- Tamil, Hindi, English & regional languages\n\n" +
+                        "Note: Provides preview clips, not full songs.")
                 .setPositiveButton("Connect", (dialog, which) -> {
                     service.setLinked(true);
                     prefs.edit().putBoolean(KEY_JIOSAAVN, true).apply();
@@ -138,28 +137,9 @@ public class SubscriptionsFragment extends Fragment {
     }
 
     private void linkYouTube(SubscriptionConfig service) {
-        new AlertDialog.Builder(requireContext())
-                .setTitle("Connect YouTube Music")
-                .setMessage("YouTube Music provides access to millions of songs via public Invidious API.\n\n" +
-                        "No login required - uses free Invidious instances.\n\n" +
-                        "Features:\n" +
-                        "- Search YouTube Music catalog\n" +
-                        "- Stream up to 256kbps AAC\n" +
-                        "- Access to music videos and audio\n" +
-                        "- Trending music in your region")
-                .setPositiveButton("Connect", (dialog, which) -> {
-                    service.setLinked(true);
-                    prefs.edit().putBoolean(KEY_YOUTUBE, true).apply();
-                    adapter.notifyDataSetChanged();
-                    Toast.makeText(requireContext(),
-                            "YouTube Music connected! Search and play from YouTube.",
-                            Toast.LENGTH_LONG).show();
-                })
-                .setNegativeButton("Cancel", (dialog, which) -> {
-                    adapter.notifyDataSetChanged();
-                })
-                .setOnCancelListener(dialog -> adapter.notifyDataSetChanged())
-                .show();
+        Toast.makeText(requireContext(),
+                "YouTube Music is temporarily unavailable. All public API instances are currently down.",
+                Toast.LENGTH_LONG).show();
     }
 
     private void unlinkService(SubscriptionConfig service, String prefKey) {

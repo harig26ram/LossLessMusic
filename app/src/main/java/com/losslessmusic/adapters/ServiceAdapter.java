@@ -83,15 +83,26 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ServiceV
         void bind(SubscriptionConfig service) {
             serviceName.setText(service.getServiceName());
 
-            if (service.isAvailable()) {
+            if (!service.isEnabled()) {
+                serviceStatus.setText("Unavailable");
+                serviceStatus.setTextColor(itemView.getContext().getColor(R.color.error_color));
+                toggleSwitch.setEnabled(false);
+                toggleSwitch.setChecked(false);
+            } else if (service.isAvailable()) {
                 serviceStatus.setText("Connected");
                 serviceStatus.setTextColor(itemView.getContext().getColor(R.color.color_primary));
+                toggleSwitch.setEnabled(true);
+                toggleSwitch.setChecked(true);
             } else if (service.getType().isAlwaysAvailable()) {
                 serviceStatus.setText("Available");
                 serviceStatus.setTextColor(itemView.getContext().getColor(R.color.text_secondary));
+                toggleSwitch.setEnabled(false);
+                toggleSwitch.setChecked(true);
             } else {
                 serviceStatus.setText("Not linked");
                 serviceStatus.setTextColor(itemView.getContext().getColor(R.color.text_hint));
+                toggleSwitch.setEnabled(true);
+                toggleSwitch.setChecked(false);
             }
 
             String quality = getMaxQualityLabel(service.getType());
@@ -110,12 +121,12 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ServiceV
                 case INTERNET_ARCHIVE:
                     return "FLAC 16-bit";
                 case JIOSAAVN:
+                    return "30s Preview";
                 case GAANA:
-                    return "320kbps AAC";
                 case SPOTIFY:
                     return "320kbps Ogg";
                 case YOUTUBE_MUSIC:
-                    return "256kbps AAC";
+                    return "Temporarily Down";
                 default:
                     return "Unknown";
             }

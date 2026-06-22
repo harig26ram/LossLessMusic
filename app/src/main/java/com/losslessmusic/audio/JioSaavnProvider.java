@@ -69,7 +69,6 @@ public class JioSaavnProvider implements AudioSourceProvider {
                     if (response.isSuccessful() && response.body() != null) {
                         String body = response.body().string();
                         List<Song> songs = parseAutocompleteResults(body);
-                        // Return results directly - they have enough info for display
                         mainHandler.post(() -> callback.onResults(songs));
                     } else {
                         mainHandler.post(() -> callback.onError("Search failed: " + response.code()));
@@ -83,37 +82,14 @@ public class JioSaavnProvider implements AudioSourceProvider {
 
     @Override
     public void getAlbumTracks(String albumId, SearchResultCallback callback) {
-        executor.execute(() -> {
-            try {
-                String url = API_BASE + "?__call=playlist.getDetails&_format=json&_marker=0&cc=in&listid=" + albumId;
-
-                Request request = new Request.Builder()
-                        .url(url)
-                        .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 12) AppleWebKit/537.36")
-                        .build();
-
-                try (Response response = client.newCall(request).execute()) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        String body = response.body().string();
-                        List<Song> songs = parsePlaylistTracks(body);
-                        mainHandler.post(() -> callback.onResults(songs));
-                    } else {
-                        mainHandler.post(() -> callback.onError("Failed to load album"));
-                    }
-                }
-            } catch (Exception e) {
-                mainHandler.post(() -> callback.onError(e.getMessage()));
-            }
-        });
+        mainHandler.post(() -> callback.onError("Not implemented"));
     }
 
     @Override
     public void getTrending(TrendingCallback callback) {
         executor.execute(() -> {
             try {
-                // Use search for trending Tamil/Hindi songs
-                String url = API_BASE + "?__call=autocomplete.get&_format=json&_marker=0&cc=in&query=trending";
-
+                String url = API_BASE + "?__call=autocomplete.get&_format=json&_marker=0&cc=in&query=trending+tamil";
                 Request request = new Request.Builder()
                         .url(url)
                         .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 12) AppleWebKit/537.36")
@@ -141,37 +117,17 @@ public class JioSaavnProvider implements AudioSourceProvider {
             if (response == null) return songs;
 
             JsonObject songsData = response.getAsJsonObject("songs");
-            if (songsData != null) {
-                JsonArray data = songsData.getAsJsonArray("data");
-                if (data != null) {
-                    for (int i = 0; i < Math.min(data.size(), 20); i++) {
-                        try {
-                            JsonObject item = data.get(i).getAsJsonObject();
-                            Song song = parseSongFromJson(item);
-                            if (song != null) songs.add(song);
-                        } catch (Exception ignored) {}
-                    }
-                }
-            }
-        } catch (Exception ignored) {}
-        return songs;
-    }
+            if (songsData == null) return songs;
 
-    private List<Song> parsePlaylistTracks(String json) {
-        List<Song> songs = new ArrayList<>();
-        try {
-            JsonObject response = gson.fromJson(json, JsonObject.class);
-            if (response == null) return songs;
+            JsonArray data = songsData.getAsJsonArray("data");
+            if (data == null) return songs;
 
-            JsonArray songsList = response.getAsJsonArray("songs");
-            if (songsList != null) {
-                for (int i = 0; i < songsList.size(); i++) {
-                    try {
-                        JsonObject item = songsList.get(i).getAsJsonObject();
-                        Song song = parseSongFromJson(item);
-                        if (song != null) songs.add(song);
-                    } catch (Exception ignored) {}
-                }
+            for (int i = 0; i < Math.min(data.size(), 15); i++) {
+                try {
+                    JsonObject item = data.get(i).getAsJsonObject();
+                    Song song = parseSongFromJson(item);
+                    if (song != null) songs.add(song);
+                } catch (Exception ignored) {}
             }
         } catch (Exception ignored) {}
         return songs;
@@ -179,59 +135,66 @@ public class JioSaavnProvider implements AudioSourceProvider {
 
     private Song parseSongFromJson(JsonObject item) {
         try {
-            String id = "";
-            if (item.has("id")) id = item.get("id").getAsString();
+            // Verified field names from actual API response:
+            // "id", "title", "image", "album", "url", "type",
+            // "more_info.vlink", "more_info.primary_artists", "more_info.singers"
 
-            String title = "Unknown";
-            if (item.has("song")) title = item.get("song").getAsString();
-            else if (item.has("title")) title = item.get("title").getAsString();
+            String id = getJsonString(item, "id");
+            if (id.isEmpty()) return null;
 
+            // Title is at top level
+            String title = getJsonString(item, "title");
+            if (title.isEmpty()) title = "Unknown";
+
+            // Artist is in more_info
             String artist = "Unknown";
-            if (item.has("primaryArtists")) {
-                String a = item.get("primaryArtists").getAsString();
-                if (!a.isEmpty()) artist = a;
-            }
-            if ("Unknown".equals(artist) && item.has("singers")) {
-                String a = item.get("singers").getAsString();
-                if (!a.isEmpty()) artist = a;
+            JsonObject moreInfo = item.has("more_info") ? item.getAsJsonObject("more_info") : null;
+            if (moreInfo != null) {
+                String primary = getJsonString(moreInfo, "primary_artists");
+                if (!primary.isEmpty()) {
+                    artist = primary;
+                } else {
+                    String singers = getJsonString(moreInfo, "singers");
+                    if (!singers.isEmpty()) artist = singers;
+                }
             }
 
             Song song = new Song(id, title, artist);
             song.setSource(Song.AudioSource.JIOSAAVN);
             song.setQuality(Song.AudioQuality.HIGH_320);
 
-            // Get artwork
-            if (item.has("image")) {
-                try {
-                    JsonArray images = item.getAsJsonArray("image");
-                    if (images != null && images.size() > 0) {
-                        JsonObject largest = images.get(images.size() - 1).getAsJsonObject();
-                        if (largest.has("link")) {
-                            song.setArtworkUrl(largest.get("link").getAsString());
-                        }
-                    }
-                } catch (Exception ignored) {}
+            // Artwork from top level
+            String image = getJsonString(item, "image");
+            if (!image.isEmpty()) {
+                // Replace small image with larger one
+                song.setArtworkUrl(image.replace("50x50", "500x500"));
             }
 
-            // Get duration
-            if (item.has("duration")) {
-                try {
-                    song.setDurationMs(Long.parseLong(item.get("duration").getAsString()) * 1000);
-                } catch (NumberFormatException ignored) {}
+            // Preview URL from more_info.vlink
+            if (moreInfo != null) {
+                String vlink = getJsonString(moreInfo, "vlink");
+                if (!vlink.isEmpty()) {
+                    song.setStreamUrl(vlink);
+                    song.setQuality(Song.AudioQuality.LOW_128);
+                }
             }
 
-            // Get preview URL (30 sec preview - always works without auth)
-            if (item.has("media_preview_url")) {
-                song.setStreamUrl(item.get("media_preview_url").getAsString());
-                song.setQuality(Song.AudioQuality.LOW_128);
-            } else if (item.has("preview_url")) {
-                song.setStreamUrl(item.get("preview_url").getAsString());
-                song.setQuality(Song.AudioQuality.LOW_128);
-            }
+            // Album
+            String album = getJsonString(item, "album");
+            if (!album.isEmpty()) song.setAlbum(album);
 
             return song;
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private String getJsonString(JsonObject obj, String key) {
+        try {
+            if (obj.has(key) && !obj.get(key).isJsonNull()) {
+                return obj.get(key).getAsString();
+            }
+        } catch (Exception ignored) {}
+        return "";
     }
 }

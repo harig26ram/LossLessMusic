@@ -33,4 +33,7 @@
 
     <!-- Status bar -->
     <color name="status_bar">#FF1C1B1F</color>
+
+    <!-- Error -->
+    <color name="error_color">#FFCF6679</color>
 </resources>

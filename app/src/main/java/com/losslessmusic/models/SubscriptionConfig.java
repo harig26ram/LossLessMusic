@@ -6,6 +6,7 @@ public class SubscriptionConfig {
     private String serviceName;
     private ServiceType type;
     private boolean linked;
+    private boolean enabled = true;
     private boolean premiumActive;
     private String userName;
     private String accessToken;
@@ -44,6 +45,8 @@ public class SubscriptionConfig {
     public ServiceType getType() { return type; }
     public boolean isLinked() { return linked; }
     public void setLinked(boolean linked) { this.linked = linked; }
+    public boolean isEnabled() { return enabled; }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
     public boolean isPremiumActive() { return premiumActive; }
     public void setPremiumActive(boolean premiumActive) { this.premiumActive = premiumActive; }
     public String getUserName() { return userName; }

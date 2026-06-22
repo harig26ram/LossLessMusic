@@ -168,59 +168,35 @@ public class HomeFragment extends Fragment {
     private void performSearch(String query) {
         binding.searchProgress.setVisibility(View.VISIBLE);
 
+        // Search Internet Archive
         archiveProvider.search(query, new AudioSourceProvider.SearchResultCallback() {
             @Override
             public void onResults(List<Song> songs) {
-                // Also search local files
-                List<Song> localResults = new ArrayList<>();
-                try {
-                    localProvider.search(query, new AudioSourceProvider.SearchResultCallback() {
-                        @Override
-                        public void onResults(List<Song> localSongs) {
-                            localResults.addAll(localSongs);
-                        }
-
-                        @Override
-                        public void onError(String message) {}
-                    });
-                } catch (Exception ignored) {}
-
                 if (binding != null) {
                     binding.searchProgress.setVisibility(View.GONE);
-                    List<Song> combined = new ArrayList<>(localResults);
-                    combined.addAll(songs);
-                    if (combined.isEmpty()) {
+                    if (songs.isEmpty()) {
                         Toast.makeText(requireContext(), "No results found", Toast.LENGTH_SHORT).show();
                     }
-                    searchAdapter.submitList(combined);
+                    searchAdapter.submitList(songs);
                 }
             }
 
             @Override
             public void onError(String message) {
-                // Archive failed, try local only
-                List<Song> localResults = new ArrayList<>();
-                try {
-                    localProvider.search(query, new AudioSourceProvider.SearchResultCallback() {
-                        @Override
-                        public void onResults(List<Song> localSongs) {
-                            localResults.addAll(localSongs);
-                        }
-
-                        @Override
-                        public void onError(String message2) {}
-                    });
-                } catch (Exception ignored) {}
-
                 if (binding != null) {
                     binding.searchProgress.setVisibility(View.GONE);
-                    searchAdapter.submitList(localResults);
+                    Toast.makeText(requireContext(), "Search failed: " + message, Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
 
     private void playSong(Song song, List<Song> queue) {
+        if (song.getStreamUrl() == null && song.getLocalUri() == null) {
+            Toast.makeText(requireContext(), "No playable source for: " + song.getTitle(), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Intent serviceIntent = new Intent(requireContext(),
                 com.losslessmusic.audio.PlaybackService.class);
         serviceIntent.setAction("com.losslessmusic.PLAY");
