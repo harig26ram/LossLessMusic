@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,6 +16,7 @@ import com.losslessmusic.adapters.SongAdapter;
 import com.losslessmusic.audio.AudioSourceProvider;
 import com.losslessmusic.audio.InternetArchiveProvider;
 import com.losslessmusic.audio.LocalFileProvider;
+import com.losslessmusic.audio.QualityResolver;
 import com.losslessmusic.databinding.FragmentHomeBinding;
 import com.losslessmusic.models.Song;
 import com.losslessmusic.ui.player.PlayerActivity;
@@ -29,6 +31,7 @@ public class HomeFragment extends Fragment {
     private SongAdapter searchAdapter;
     private LocalFileProvider localProvider;
     private InternetArchiveProvider archiveProvider;
+    private QualityResolver qualityResolver;
     private boolean showingSearch = false;
 
     @Nullable
@@ -46,6 +49,10 @@ public class HomeFragment extends Fragment {
         localProvider = new LocalFileProvider(requireContext());
         archiveProvider = new InternetArchiveProvider();
 
+        qualityResolver = new QualityResolver();
+        qualityResolver.registerProvider(localProvider);
+        qualityResolver.registerProvider(archiveProvider);
+
         setupTrending();
         setupSearch();
         loadTrending();
@@ -59,12 +66,11 @@ public class HomeFragment extends Fragment {
         trendingAdapter.setOnSongClickListener(new SongAdapter.OnSongClickListener() {
             @Override
             public void onSongClick(Song song, int position) {
-                playSong(song, trendingAdapter.getCurrentList());
+                playSongWithBestQuality(song, trendingAdapter.getCurrentList());
             }
 
             @Override
-            public void onSongLongClick(Song song, int position) {
-            }
+            public void onSongLongClick(Song song, int position) {}
         });
     }
 
@@ -72,6 +78,16 @@ public class HomeFragment extends Fragment {
         searchAdapter = new SongAdapter();
         binding.searchResultsList.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.searchResultsList.setAdapter(searchAdapter);
+
+        searchAdapter.setOnSongClickListener(new SongAdapter.OnSongClickListener() {
+            @Override
+            public void onSongClick(Song song, int position) {
+                playSongWithBestQuality(song, searchAdapter.getCurrentList());
+            }
+
+            @Override
+            public void onSongLongClick(Song song, int position) {}
+        });
 
         binding.searchView.addTextChangedListener(new android.text.TextWatcher() {
             @Override
@@ -81,6 +97,10 @@ public class HomeFragment extends Fragment {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.length() >= 2) {
                     performSearch(s.toString());
+                } else if (s.length() == 0) {
+                    showingSearch = false;
+                    binding.trendingSection.setVisibility(View.VISIBLE);
+                    binding.searchResultsSection.setVisibility(View.GONE);
                 }
             }
 
@@ -106,10 +126,16 @@ public class HomeFragment extends Fragment {
 
         List<Song> allSongs = new ArrayList<>();
 
-        localProvider.search(null, new AudioSourceProvider.SearchResultCallback() {
+        // First load local files (fast, synchronous)
+        localProvider.getTrending(new AudioSourceProvider.TrendingCallback() {
             @Override
-            public void onResults(List<Song> songs) {
+            public void onResults(List<Song> songs, String category) {
                 allSongs.addAll(songs);
+                if (binding != null) {
+                    trendingAdapter.submitList(new ArrayList<>(allSongs));
+                    binding.progressBar.setVisibility(View.GONE);
+                }
+                // Then load from Internet Archive (async, slower)
                 loadArchiveTrending(allSongs);
             }
 
@@ -124,13 +150,14 @@ public class HomeFragment extends Fragment {
         archiveProvider.getTrending(new AudioSourceProvider.TrendingCallback() {
             @Override
             public void onResults(List<Song> songs, String category) {
-                existing.addAll(songs);
                 if (binding != null) {
                     binding.progressBar.setVisibility(View.GONE);
-                    if (existing.isEmpty()) {
+                    if (songs.isEmpty() && existing.isEmpty()) {
                         binding.emptyState.setVisibility(View.VISIBLE);
                     } else {
-                        trendingAdapter.submitList(existing);
+                        binding.emptyState.setVisibility(View.GONE);
+                        existing.addAll(songs);
+                        trendingAdapter.submitList(new ArrayList<>(existing));
                     }
                 }
             }
@@ -142,7 +169,7 @@ public class HomeFragment extends Fragment {
                     if (existing.isEmpty()) {
                         binding.emptyState.setVisibility(View.VISIBLE);
                     } else {
-                        trendingAdapter.submitList(existing);
+                        trendingAdapter.submitList(new ArrayList<>(existing));
                     }
                 }
             }
@@ -163,6 +190,9 @@ public class HomeFragment extends Fragment {
                         results.addAll(0, localSongs);
                         if (binding != null) {
                             binding.searchProgress.setVisibility(View.GONE);
+                            if (results.isEmpty()) {
+                                Toast.makeText(requireContext(), "No results found", Toast.LENGTH_SHORT).show();
+                            }
                             searchAdapter.submitList(results);
                         }
                     }
@@ -179,9 +209,44 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onError(String message) {
-                if (binding != null) {
-                    binding.searchProgress.setVisibility(View.GONE);
-                }
+                localProvider.search(query, new AudioSourceProvider.SearchResultCallback() {
+                    @Override
+                    public void onResults(List<Song> localSongs) {
+                        if (binding != null) {
+                            binding.searchProgress.setVisibility(View.GONE);
+                            searchAdapter.submitList(localSongs);
+                        }
+                    }
+
+                    @Override
+                    public void onError(String message2) {
+                        if (binding != null) {
+                            binding.searchProgress.setVisibility(View.GONE);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    private void playSongWithBestQuality(Song song, List<Song> queue) {
+        if (song.getStreamUrl() != null || song.getLocalUri() != null) {
+            playSong(song, queue);
+            return;
+        }
+
+        Toast.makeText(requireContext(), "Resolving best quality...", Toast.LENGTH_SHORT).show();
+
+        qualityResolver.resolveBestSource(song, resolved -> {
+            if (resolved != null) {
+                song.setStreamUrl(resolved.streamUrl);
+                song.setSource(resolved.provider);
+                song.setQuality(resolved.quality);
+                playSong(song, queue);
+            } else {
+                Toast.makeText(requireContext(),
+                        "No playable source found for: " + song.getTitle(),
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }

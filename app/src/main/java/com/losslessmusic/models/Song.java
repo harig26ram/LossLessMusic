@@ -24,6 +24,7 @@ public class Song implements Serializable {
         JIOSAAVN,
         GAANA,
         SPOTIFY_PREVIEW,
+        YOUTUBE_MUSIC,
         UNKNOWN
     }
 

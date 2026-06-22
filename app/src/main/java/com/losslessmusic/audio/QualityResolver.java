@@ -4,7 +4,6 @@ import com.losslessmusic.models.Song;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -48,6 +47,7 @@ public class QualityResolver {
 
         for (AudioSourceProvider provider : providers) {
             if (!provider.isAvailable()) continue;
+
             if (provider.getSourceType() == song.getSource()
                     && song.getStreamUrl() != null) {
                 candidates.add(new ResolvedSource(
@@ -59,6 +59,88 @@ public class QualityResolver {
             }
         }
 
+        if (!candidates.isEmpty()) {
+            sortAndReturn(candidates, callback);
+            return;
+        }
+
+        searchAcrossProviders(song, candidates, callback);
+    }
+
+    private void searchAcrossProviders(Song song, List<ResolvedSource> candidates,
+                                        ResolutionCallback callback) {
+        if (providers.isEmpty()) {
+            callback.onResolved(null);
+            return;
+        }
+
+        AtomicInteger remaining = new AtomicInteger(providers.size());
+
+        for (AudioSourceProvider provider : providers) {
+            if (!provider.isAvailable()) {
+                if (remaining.decrementAndGet() == 0) {
+                    sortAndReturn(candidates, callback);
+                }
+                continue;
+            }
+
+            String query = song.getTitle() + " " + song.getArtist();
+            provider.search(query, new AudioSourceProvider.SearchResultCallback() {
+                @Override
+                public void onResults(List<Song> songs) {
+                    for (Song found : songs) {
+                        if (isMatchingSong(song, found) && found.getStreamUrl() != null) {
+                            synchronized (candidates) {
+                                candidates.add(new ResolvedSource(
+                                        found,
+                                        provider.getSourceType(),
+                                        found.getQuality(),
+                                        found.getStreamUrl()
+                                ));
+                            }
+                            break;
+                        }
+                    }
+                    if (remaining.decrementAndGet() == 0) {
+                        sortAndReturn(candidates, callback);
+                    }
+                }
+
+                @Override
+                public void onError(String message) {
+                    if (remaining.decrementAndGet() == 0) {
+                        sortAndReturn(candidates, callback);
+                    }
+                }
+            });
+        }
+    }
+
+    private boolean isMatchingSong(Song original, Song found) {
+        String origTitle = normalize(original.getTitle());
+        String foundTitle = normalize(found.getTitle());
+        String origArtist = normalize(original.getArtist());
+        String foundArtist = normalize(found.getArtist());
+
+        boolean titleMatch = origTitle.equals(foundTitle)
+                || origTitle.contains(foundTitle)
+                || foundTitle.contains(origTitle);
+
+        boolean artistMatch = origArtist.equals(foundArtist)
+                || origArtist.contains(foundArtist)
+                || foundArtist.contains(origArtist);
+
+        return titleMatch && artistMatch;
+    }
+
+    private String normalize(String s) {
+        return s.toLowerCase()
+                .replaceAll("[^a-z0-9\\s]", "")
+                .replaceAll("\\s+", " ")
+                .trim();
+    }
+
+    private void sortAndReturn(List<ResolvedSource> candidates, ResolutionCallback callback) {
         if (candidates.isEmpty()) {
             callback.onResolved(null);
             return;
@@ -102,7 +184,6 @@ public class QualityResolver {
     private boolean isPremiumProvider(Song.AudioSource source) {
         switch (source) {
             case SPOTIFY_PREVIEW:
-            case JIOSAAVN:
             case GAANA:
                 return true;
             default:
