@@ -1,59 +1,41 @@
 package com.losslessmusic.ui.player;
 
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
-import android.view.View;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.MediaMetadata;
+import androidx.media3.common.PlaybackException;
+import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
+import androidx.media3.datasource.okhttp.OkHttpDataSource;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.source.ProgressiveMediaSource;
 
 import com.bumptech.glide.Glide;
 import com.losslessmusic.R;
-import com.losslessmusic.audio.PlaybackService;
 import com.losslessmusic.databinding.ActivityPlayerBinding;
 import com.losslessmusic.models.Song;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.OkHttpClient;
 
 @UnstableApi
 public class PlayerActivity extends AppCompatActivity {
 
     private ActivityPlayerBinding binding;
-    private PlaybackService playbackService;
-    private boolean serviceBound = false;
+    private ExoPlayer exoPlayer;
+    private List<Song> playlist = new ArrayList<>();
+    private int currentIndex = 0;
     private Handler handler = new Handler(Looper.getMainLooper());
     private boolean userSeeking = false;
-
-    private final ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            PlaybackService.LocalBinder binder = (PlaybackService.LocalBinder) service;
-            playbackService = binder.getService();
-            serviceBound = true;
-
-            playbackService.setOnPlaybackErrorListener(error -> {
-                handler.post(() -> {
-                    Toast.makeText(PlayerActivity.this, error, Toast.LENGTH_LONG).show();
-                    binding.qualityInfo.setText("Error: " + error);
-                });
-            });
-
-            updateUI();
-            startProgressUpdater();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            serviceBound = false;
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,124 +43,143 @@ public class PlayerActivity extends AppCompatActivity {
         binding = ActivityPlayerBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("songs")) {
+            playlist = intent.getParcelableArrayListExtra("songs");
+            currentIndex = intent.getIntExtra("startIndex", 0);
+        }
+
+        setupToolbar();
         setupControls();
-        bindPlaybackService();
+        initPlayer();
+    }
+
+    private void setupToolbar() {
+        binding.toolbar.setNavigationOnClickListener(v -> finish());
     }
 
     private void setupControls() {
-        binding.toolbar.setNavigationOnClickListener(v -> finish());
-
         binding.playPauseButton.setOnClickListener(v -> {
-            if (serviceBound) {
-                playbackService.togglePlayPause();
+            if (exoPlayer != null) {
+                if (exoPlayer.isPlaying()) {
+                    exoPlayer.pause();
+                } else {
+                    exoPlayer.play();
+                }
                 updatePlayPauseButton();
             }
         });
 
-        binding.nextButton.setOnClickListener(v -> {
-            if (serviceBound) playbackService.playNext();
-        });
-
-        binding.prevButton.setOnClickListener(v -> {
-            if (serviceBound) playbackService.playPrevious();
-        });
+        binding.nextButton.setOnClickListener(v -> playNext());
+        binding.prevButton.setOnClickListener(v -> playPrevious());
 
         binding.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser && serviceBound) {
-                    binding.currentTime.setText(formatTime(progress));
-                }
+            @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) binding.currentTime.setText(formatTime(progress));
             }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                userSeeking = true;
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                if (serviceBound) {
-                    playbackService.seekTo(seekBar.getProgress());
-                }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) { userSeeking = true; }
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {
+                if (exoPlayer != null) exoPlayer.seekTo(seekBar.getProgress());
                 userSeeking = false;
             }
         });
 
         binding.queueButton.setOnClickListener(v -> {
-            if (serviceBound) {
-                List<Song> playlist = playbackService.getPlaylist();
-                StringBuilder sb = new StringBuilder("Queue (" + playlist.size() + " songs):\n");
-                for (int i = 0; i < playlist.size(); i++) {
-                    Song s = playlist.get(i);
-                    String marker = (i == playbackService.getCurrentIndex()) ? "▶ " : "  ";
-                    sb.append(marker).append(s.getTitle()).append(" - ").append(s.getArtist()).append("\n");
-                }
-                Toast.makeText(this, sb.toString(), Toast.LENGTH_LONG).show();
+            StringBuilder sb = new StringBuilder("Queue (" + playlist.size() + "):\n");
+            for (int i = 0; i < playlist.size(); i++) {
+                Song s = playlist.get(i);
+                sb.append(i == currentIndex ? "▶ " : "  ")
+                  .append(s.getTitle()).append(" - ").append(s.getArtist()).append("\n");
             }
+            Toast.makeText(this, sb.toString(), Toast.LENGTH_LONG).show();
         });
     }
 
-    private void bindPlaybackService() {
-        Intent intent = new Intent(this, PlaybackService.class);
-        startService(intent);
-        bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+    private void initPlayer() {
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(chain -> {
+                    okhttp3.Request request = chain.request().newBuilder()
+                            .header("User-Agent", "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36")
+                            .header("Accept", "*/*")
+                            .build();
+                    return chain.proceed(request);
+                })
+                .build();
+
+        exoPlayer = new ExoPlayer.Builder(this)
+                .setMediaSourceFactory(new ProgressiveMediaSource.Factory(
+                        new OkHttpDataSource.Factory(client)))
+                .setHandleAudioBecomingNoisy(true)
+                .build();
+
+        exoPlayer.addListener(new Player.Listener() {
+            @Override
+            public void onPlayerError(PlaybackException error) {
+                Toast.makeText(PlayerActivity.this,
+                        "Playback error: " + error.getMessage(),
+                        Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onMediaItemTransition(MediaItem mediaItem, int reason) {
+                if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
+                    currentIndex = exoPlayer.getCurrentMediaItemIndex();
+                    updateUI();
+                }
+            }
+
+            @Override
+            public void onIsPlayingChanged(boolean isPlaying) {
+                updatePlayPauseButton();
+            }
+
+            @Override
+            public void onPlaybackStateChanged(int state) {
+                if (state == Player.STATE_READY) {
+                    updateUI();
+                }
+            }
+        });
+
+        if (!playlist.isEmpty()) {
+            buildQueue();
+        }
     }
 
-    private void updateUI() {
-        if (!serviceBound) return;
+    private void buildQueue() {
+        List<MediaItem> items = new ArrayList<>();
+        for (Song song : playlist) {
+            String url = song.getStreamUrl();
+            if (url == null || url.isEmpty()) continue;
 
-        Song current = playbackService.getCurrentSong();
-        if (current != null) {
-            binding.songTitle.setText(current.getTitle());
-            binding.songArtist.setText(current.getArtist());
-            binding.qualityInfo.setText(current.getSourceQualityLabel());
-
-            Glide.with(this)
-                    .load(current.getArtworkUrl())
-                    .placeholder(R.drawable.ic_music_note)
-                    .centerCrop()
-                    .into(binding.albumArt);
-        } else {
-            binding.songTitle.setText("No song playing");
-            binding.songArtist.setText("");
-            binding.qualityInfo.setText("");
+            MediaItem item = new MediaItem.Builder()
+                    .setUri(url)
+                    .setMediaMetadata(new MediaMetadata.Builder()
+                            .setTitle(song.getTitle())
+                            .setArtist(song.getArtist())
+                            .setAlbumTitle(song.getAlbum())
+                            .build())
+                    .build();
+            items.add(item);
         }
 
-        updatePlayPauseButton();
-        updateSeekBar();
-    }
-
-    private void updatePlayPauseButton() {
-        if (serviceBound && playbackService.isPlaying()) {
-            binding.playPauseButton.setImageResource(R.drawable.ic_pause);
-        } else {
-            binding.playPauseButton.setImageResource(R.drawable.ic_play);
+        if (items.isEmpty()) {
+            Toast.makeText(this, "No playable songs", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
         }
-    }
 
-    private void updateSeekBar() {
-        if (!serviceBound || userSeeking) return;
+        exoPlayer.setMediaItems(items, Math.min(currentIndex, items.size() - 1), 0);
+        exoPlayer.prepare();
+        exoPlayer.play();
+        updateUI();
 
-        long position = playbackService.getCurrentPosition();
-        long duration = playbackService.getDuration();
-
-        if (duration > 0) {
-            binding.seekBar.setMax((int) duration);
-            binding.seekBar.setProgress((int) position);
-            binding.currentTime.setText(formatTime((int) position));
-            binding.totalTime.setText(formatTime((int) duration));
-        }
-    }
-
-    private void startProgressUpdater() {
         Runnable updater = new Runnable() {
             @Override
             public void run() {
-                if (serviceBound) {
-                    updateSeekBar();
+                updateSeekBar();
+                if (exoPlayer != null && !exoPlayer.isPlaying()) {
                     updatePlayPauseButton();
-                    updateUI();
                 }
                 handler.postDelayed(this, 500);
             }
@@ -186,20 +187,65 @@ public class PlayerActivity extends AppCompatActivity {
         handler.post(updater);
     }
 
+    private void playNext() {
+        if (exoPlayer != null) exoPlayer.seekToNext();
+    }
+
+    private void playPrevious() {
+        if (exoPlayer == null) return;
+        if (exoPlayer.getCurrentPosition() > 3000) {
+            exoPlayer.seekTo(0);
+        } else {
+            exoPlayer.seekToPrevious();
+        }
+    }
+
+    private void updateUI() {
+        if (currentIndex < 0 || currentIndex >= playlist.size()) return;
+        Song current = playlist.get(currentIndex);
+
+        binding.songTitle.setText(current.getTitle());
+        binding.songArtist.setText(current.getArtist());
+        binding.qualityInfo.setText(current.getSourceQualityLabel());
+
+        Glide.with(this)
+                .load(current.getArtworkUrl())
+                .placeholder(R.drawable.ic_music_note)
+                .centerCrop()
+                .into(binding.albumArt);
+    }
+
+    private void updatePlayPauseButton() {
+        if (exoPlayer == null) return;
+        binding.playPauseButton.setImageResource(
+                exoPlayer.isPlaying() ? R.drawable.ic_pause : R.drawable.ic_play);
+    }
+
+    private void updateSeekBar() {
+        if (exoPlayer == null || userSeeking) return;
+        long pos = exoPlayer.getCurrentPosition();
+        long dur = exoPlayer.getDuration();
+        if (dur > 0) {
+            binding.seekBar.setMax((int) dur);
+            binding.seekBar.setProgress((int) pos);
+            binding.currentTime.setText(formatTime((int) pos));
+            binding.totalTime.setText(formatTime((int) dur));
+        }
+    }
+
     private String formatTime(int millis) {
-        int totalSeconds = millis / 1000;
-        int minutes = totalSeconds / 60;
-        int seconds = totalSeconds % 60;
-        return String.format("%d:%02d", minutes, seconds);
+        int s = millis / 1000;
+        return String.format("%d:%02d", s / 60, s % 60);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         handler.removeCallbacksAndMessages(null);
-        if (serviceBound) {
-            unbindService(serviceConnection);
-            serviceBound = false;
+        if (exoPlayer != null) {
+            exoPlayer.stop();
+            exoPlayer.release();
+            exoPlayer = null;
         }
     }
 }
