@@ -68,6 +68,8 @@ public class SubscriptionsFragment extends Fragment {
 
         services.add(new SubscriptionConfig(SubscriptionConfig.ServiceType.LOCAL));
         services.add(new SubscriptionConfig(SubscriptionConfig.ServiceType.INTERNET_ARCHIVE));
+        services.add(new SubscriptionConfig(SubscriptionConfig.ServiceType.ITUNES));
+        services.add(new SubscriptionConfig(SubscriptionConfig.ServiceType.RADIO_BROWSER));
 
         SubscriptionConfig jiosaavn = new SubscriptionConfig(SubscriptionConfig.ServiceType.JIOSAAVN);
         jiosaavn.setLinked(prefs.getBoolean(KEY_JIOSAAVN, false));
@@ -97,6 +99,8 @@ public class SubscriptionsFragment extends Fragment {
                 break;
             case LOCAL:
             case INTERNET_ARCHIVE:
+            case ITUNES:
+            case RADIO_BROWSER:
                 Toast.makeText(requireContext(),
                         service.getServiceName() + " is always available",
                         Toast.LENGTH_SHORT).show();
@@ -215,6 +219,22 @@ public class SubscriptionsFragment extends Fragment {
                         "- FLAC and MP3 formats\n" +
                         "- No account required\n\n" +
                         "Quality: Up to FLAC 16-bit";
+            case ITUNES:
+                return "Search the entire iTunes music catalog.\n\n" +
+                        "Features:\n" +
+                        "- 30-second preview clips\n" +
+                        "- Tamil, Hindi, English & global music\n" +
+                        "- High quality AAC audio\n" +
+                        "- No account required\n\n" +
+                        "Quality: 30s AAC Preview";
+            case RADIO_BROWSER:
+                return "Access 50,000+ live radio stations worldwide.\n\n" +
+                        "Features:\n" +
+                        "- Tamil language stations\n" +
+                        "- Indian regional stations\n" +
+                        "- Live streaming\n" +
+                        "- No account required\n\n" +
+                        "Quality: Live MP3 stream";
             default:
                 return "";
         }
@@ -224,6 +244,10 @@ public class SubscriptionsFragment extends Fragment {
         switch (type) {
             case JIOSAAVN:
                 return "Up to 320kbps AAC\nFree tier includes high quality streaming";
+            case ITUNES:
+                return "30-second AAC preview clips\nHigh quality audio";
+            case RADIO_BROWSER:
+                return "Live MP3 stream\nQuality depends on station";
             case GAANA:
                 return "Up to 320kbps AAC\nFree tier available";
             case SPOTIFY:

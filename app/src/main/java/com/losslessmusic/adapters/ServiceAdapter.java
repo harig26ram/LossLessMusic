@@ -120,6 +120,10 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ServiceV
                     return "FLAC 24-bit";
                 case INTERNET_ARCHIVE:
                     return "FLAC 16-bit";
+                case ITUNES:
+                    return "30s AAC Preview";
+                case RADIO_BROWSER:
+                    return "Live MP3";
                 case JIOSAAVN:
                     return "30s Preview";
                 case GAANA:
@@ -138,6 +142,10 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ServiceV
                     return R.drawable.ic_phone;
                 case INTERNET_ARCHIVE:
                     return R.drawable.ic_cloud;
+                case ITUNES:
+                    return R.drawable.ic_headphones;
+                case RADIO_BROWSER:
+                    return R.drawable.ic_music_note;
                 case JIOSAAVN:
                     return R.drawable.ic_headphones;
                 case GAANA:

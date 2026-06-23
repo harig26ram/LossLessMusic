@@ -15,13 +15,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.losslessmusic.adapters.SongAdapter;
 import com.losslessmusic.audio.AudioSourceProvider;
 import com.losslessmusic.audio.InternetArchiveProvider;
+import com.losslessmusic.audio.ITunesProvider;
+import com.losslessmusic.audio.JioSaavnProvider;
 import com.losslessmusic.audio.LocalFileProvider;
+import com.losslessmusic.audio.RadioBrowserProvider;
 import com.losslessmusic.databinding.FragmentHomeBinding;
 import com.losslessmusic.models.Song;
 import com.losslessmusic.ui.player.PlayerActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class HomeFragment extends Fragment {
 
@@ -30,6 +34,9 @@ public class HomeFragment extends Fragment {
     private SongAdapter searchAdapter;
     private LocalFileProvider localProvider;
     private InternetArchiveProvider archiveProvider;
+    private JioSaavnProvider jiosaavnProvider;
+    private ITunesProvider iTunesProvider;
+    private RadioBrowserProvider radioProvider;
 
     @Nullable
     @Override
@@ -45,6 +52,9 @@ public class HomeFragment extends Fragment {
 
         localProvider = new LocalFileProvider(requireContext());
         archiveProvider = new InternetArchiveProvider();
+        jiosaavnProvider = new JioSaavnProvider();
+        iTunesProvider = new ITunesProvider();
+        radioProvider = new RadioBrowserProvider();
 
         setupTrending();
         setupSearch();
@@ -116,51 +126,83 @@ public class HomeFragment extends Fragment {
         binding.progressBar.setVisibility(View.VISIBLE);
         binding.emptyState.setVisibility(View.GONE);
 
-        // Load local files first (fast, synchronous)
-        List<Song> localSongs = new ArrayList<>();
-        try {
-            localProvider.getTrending(new AudioSourceProvider.TrendingCallback() {
-                @Override
-                public void onResults(List<Song> songs, String category) {
-                    localSongs.addAll(songs);
-                }
+        List<Song> allSongs = new ArrayList<>();
+        AtomicInteger sourcesRemaining = new AtomicInteger(4);
 
-                @Override
-                public void onError(String message) {}
-            });
-        } catch (Exception ignored) {}
-
-        if (!localSongs.isEmpty()) {
-            trendingAdapter.submitList(new ArrayList<>(localSongs));
-        }
-
-        // Then load from Internet Archive
-        archiveProvider.getTrending(new AudioSourceProvider.TrendingCallback() {
+        AudioSourceProvider.TrendingCallback aggregateCallback = new AudioSourceProvider.TrendingCallback() {
             @Override
-            public void onResults(List<Song> songs, String category) {
-                if (binding != null) {
+            public synchronized void onResults(List<Song> songs, String category) {
+                allSongs.addAll(songs);
+                if (sourcesRemaining.decrementAndGet() == 0 && binding != null) {
                     binding.progressBar.setVisibility(View.GONE);
-                    List<Song> combined = new ArrayList<>(localSongs);
-                    combined.addAll(songs);
-                    if (combined.isEmpty()) {
+                    if (allSongs.isEmpty()) {
                         binding.emptyState.setVisibility(View.VISIBLE);
                     } else {
                         binding.emptyState.setVisibility(View.GONE);
-                        trendingAdapter.submitList(combined);
+                        trendingAdapter.submitList(new ArrayList<>(allSongs));
                     }
                 }
             }
 
             @Override
-            public void onError(String message) {
-                if (binding != null) {
+            public synchronized void onError(String message) {
+                if (sourcesRemaining.decrementAndGet() == 0 && binding != null) {
                     binding.progressBar.setVisibility(View.GONE);
-                    if (localSongs.isEmpty()) {
+                    if (allSongs.isEmpty()) {
                         binding.emptyState.setVisibility(View.VISIBLE);
                     } else {
-                        trendingAdapter.submitList(new ArrayList<>(localSongs));
+                        binding.emptyState.setVisibility(View.GONE);
+                        trendingAdapter.submitList(new ArrayList<>(allSongs));
                     }
                 }
+            }
+        };
+
+        try {
+            localProvider.getTrending(new AudioSourceProvider.TrendingCallback() {
+                @Override
+                public void onResults(List<Song> songs, String category) {
+                    aggregateCallback.onResults(songs, category);
+                }
+                @Override
+                public void onError(String message) {
+                    aggregateCallback.onError(message);
+                }
+            });
+        } catch (Exception e) {
+            aggregateCallback.onError("local");
+        }
+
+        archiveProvider.getTrending(new AudioSourceProvider.TrendingCallback() {
+            @Override
+            public void onResults(List<Song> songs, String category) {
+                aggregateCallback.onResults(songs, category);
+            }
+            @Override
+            public void onError(String message) {
+                aggregateCallback.onError(message);
+            }
+        });
+
+        jiosaavnProvider.getTrending(new AudioSourceProvider.TrendingCallback() {
+            @Override
+            public void onResults(List<Song> songs, String category) {
+                aggregateCallback.onResults(songs, category);
+            }
+            @Override
+            public void onError(String message) {
+                aggregateCallback.onError(message);
+            }
+        });
+
+        radioProvider.getTrending(new AudioSourceProvider.TrendingCallback() {
+            @Override
+            public void onResults(List<Song> songs, String category) {
+                aggregateCallback.onResults(songs, category);
+            }
+            @Override
+            public void onError(String message) {
+                aggregateCallback.onError(message);
             }
         });
     }
@@ -168,26 +210,54 @@ public class HomeFragment extends Fragment {
     private void performSearch(String query) {
         binding.searchProgress.setVisibility(View.VISIBLE);
 
-        // Search Internet Archive
-        archiveProvider.search(query, new AudioSourceProvider.SearchResultCallback() {
+        List<Song> allResults = new ArrayList<>();
+        AtomicInteger sourcesRemaining = new AtomicInteger(3);
+
+        AudioSourceProvider.SearchResultCallback aggregateCallback = new AudioSourceProvider.SearchResultCallback() {
             @Override
-            public void onResults(List<Song> songs) {
-                if (binding != null) {
+            public synchronized void onResults(List<Song> songs) {
+                allResults.addAll(songs);
+                if (sourcesRemaining.decrementAndGet() == 0 && binding != null) {
                     binding.searchProgress.setVisibility(View.GONE);
-                    if (songs.isEmpty()) {
+                    if (allResults.isEmpty()) {
                         Toast.makeText(requireContext(), "No results found", Toast.LENGTH_SHORT).show();
                     }
-                    searchAdapter.submitList(songs);
+                    searchAdapter.submitList(allResults);
                 }
             }
 
             @Override
-            public void onError(String message) {
-                if (binding != null) {
+            public synchronized void onError(String message) {
+                if (sourcesRemaining.decrementAndGet() == 0 && binding != null) {
                     binding.searchProgress.setVisibility(View.GONE);
-                    Toast.makeText(requireContext(), "Search failed: " + message, Toast.LENGTH_SHORT).show();
+                    if (allResults.isEmpty()) {
+                        Toast.makeText(requireContext(), "Search failed", Toast.LENGTH_SHORT).show();
+                    } else {
+                        searchAdapter.submitList(allResults);
+                    }
                 }
             }
+        };
+
+        archiveProvider.search(query, new AudioSourceProvider.SearchResultCallback() {
+            @Override
+            public void onResults(List<Song> songs) { aggregateCallback.onResults(songs); }
+            @Override
+            public void onError(String message) { aggregateCallback.onError(message); }
+        });
+
+        jiosaavnProvider.search(query, new AudioSourceProvider.SearchResultCallback() {
+            @Override
+            public void onResults(List<Song> songs) { aggregateCallback.onResults(songs); }
+            @Override
+            public void onError(String message) { aggregateCallback.onError(message); }
+        });
+
+        iTunesProvider.search(query, new AudioSourceProvider.SearchResultCallback() {
+            @Override
+            public void onResults(List<Song> songs) { aggregateCallback.onResults(songs); }
+            @Override
+            public void onError(String message) { aggregateCallback.onError(message); }
         });
     }
 

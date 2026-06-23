@@ -22,6 +22,8 @@ public class Song implements Parcelable {
         LOCAL,
         INTERNET_ARCHIVE,
         JIOSAAVN,
+        ITUNES,
+        RADIO_BROWSER,
         GAANA,
         SPOTIFY_PREVIEW,
         YOUTUBE_MUSIC,

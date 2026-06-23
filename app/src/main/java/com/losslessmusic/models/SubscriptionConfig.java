@@ -17,6 +17,8 @@ public class SubscriptionConfig {
     public enum ServiceType {
         LOCAL("Local Files", true),
         INTERNET_ARCHIVE("Internet Archive", true),
+        ITUNES("iTunes Music", true),
+        RADIO_BROWSER("Live Radio", true),
         JIOSAAVN("JioSaavn", false),
         GAANA("Gaana", false),
         SPOTIFY("Spotify", false),
