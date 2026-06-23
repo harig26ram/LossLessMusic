@@ -7,12 +7,14 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.media.session.MediaSessionCompat;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.media3.common.C;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
+import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.datasource.okhttp.OkHttpDataSource;
@@ -32,6 +34,7 @@ import okhttp3.OkHttpClient;
 @UnstableApi
 public class PlaybackService extends Service {
 
+    private static final String TAG = "PlaybackService";
     private static final String ACTION_PLAY = "com.losslessmusic.PLAY";
     private static final String ACTION_PAUSE = "com.losslessmusic.PAUSE";
     private static final String ACTION_NEXT = "com.losslessmusic.NEXT";
@@ -47,6 +50,15 @@ public class PlaybackService extends Service {
     private int currentIndex = 0;
 
     private Player.Listener playerListener;
+    private OnPlaybackErrorListener errorListener;
+
+    public interface OnPlaybackErrorListener {
+        void onPlaybackError(String error);
+    }
+
+    public void setOnPlaybackErrorListener(OnPlaybackErrorListener listener) {
+        this.errorListener = listener;
+    }
 
     public class LocalBinder extends Binder {
         public PlaybackService getService() {
@@ -62,7 +74,17 @@ public class PlaybackService extends Service {
     }
 
     private void initPlayer() {
-        OkHttpClient client = new OkHttpClient.Builder().build();
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(chain -> {
+                    okhttp3.Request request = chain.request().newBuilder()
+                            .header("User-Agent", "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36")
+                            .header("Accept", "*/*")
+                            .header("Accept-Language", "en-US,en;q=0.9,hi;q=0.8")
+                            .build();
+                    return chain.proceed(request);
+                })
+                .build();
+
         OkHttpDataSource.Factory dataSourceFactory =
                 new OkHttpDataSource.Factory(client);
 
@@ -77,6 +99,21 @@ public class PlaybackService extends Service {
             public void onPlaybackStateChanged(int state) {
                 if (state == Player.STATE_READY) {
                     updateNotification();
+                } else if (state == Player.STATE_IDLE) {
+                    Log.w(TAG, "Player state: IDLE");
+                } else if (state == Player.STATE_BUFFERING) {
+                    Log.d(TAG, "Player state: BUFFERING");
+                } else if (state == Player.STATE_ENDED) {
+                    Log.d(TAG, "Player state: ENDED");
+                }
+            }
+
+            @Override
+            public void onPlayerError(PlaybackException error) {
+                String msg = "Playback error: " + error.getMessage();
+                Log.e(TAG, msg, error);
+                if (errorListener != null) {
+                    errorListener.onPlaybackError(msg);
                 }
             }
 
@@ -184,8 +221,11 @@ public class PlaybackService extends Service {
 
             if (song.getLocalUri() != null) {
                 builder.setUri(song.getLocalUri());
-            } else if (song.getStreamUrl() != null) {
+            } else if (song.getStreamUrl() != null && !song.getStreamUrl().isEmpty()) {
                 builder.setUri(song.getStreamUrl());
+            } else {
+                Log.w(TAG, "Song has no playable URL: " + song.getTitle());
+                continue;
             }
 
             MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder();
@@ -195,6 +235,14 @@ public class PlaybackService extends Service {
             builder.setMediaMetadata(metadataBuilder.build());
 
             mediaItems.add(builder.build());
+        }
+
+        if (mediaItems.isEmpty()) {
+            Log.e(TAG, "No playable media items");
+            if (errorListener != null) {
+                errorListener.onPlaybackError("No playable source available");
+            }
+            return;
         }
 
         exoPlayer.setMediaItems(mediaItems, startIndex, 0);

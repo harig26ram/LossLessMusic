@@ -110,12 +110,8 @@ public class HomeFragment extends Fragment {
             public void afterTextChanged(android.text.Editable s) {}
         });
 
-        binding.searchBar.setOnClickListener(v -> {
-            boolean showing = binding.searchResultsSection.getVisibility() == View.VISIBLE;
-            if (showing) {
-                binding.trendingSection.setVisibility(View.VISIBLE);
-                binding.searchResultsSection.setVisibility(View.GONE);
-            } else {
+        binding.searchView.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
                 binding.trendingSection.setVisibility(View.GONE);
                 binding.searchResultsSection.setVisibility(View.VISIBLE);
             }
@@ -266,6 +262,8 @@ public class HomeFragment extends Fragment {
             Toast.makeText(requireContext(), "No playable source for: " + song.getTitle(), Toast.LENGTH_SHORT).show();
             return;
         }
+
+        Toast.makeText(requireContext(), "Playing: " + song.getTitle(), Toast.LENGTH_SHORT).show();
 
         Intent serviceIntent = new Intent(requireContext(),
                 com.losslessmusic.audio.PlaybackService.class);

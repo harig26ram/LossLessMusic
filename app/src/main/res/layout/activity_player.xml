@@ -191,6 +191,18 @@
 
         </LinearLayout>
 
+        <ImageButton
+            android:id="@+id/queueButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_queue_music"
+            android:scaleType="centerInside"
+            android:contentDescription="Queue"
+            app:tint="@color/text_secondary_player"
+            android:layout_marginTop="8dp" />
+
     </LinearLayout>
 
 </LinearLayout>

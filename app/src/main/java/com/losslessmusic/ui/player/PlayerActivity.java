@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.view.View;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -15,7 +16,6 @@ import androidx.media3.common.util.UnstableApi;
 
 import com.bumptech.glide.Glide;
 import com.losslessmusic.R;
-import com.losslessmusic.audio.LocalFileProvider;
 import com.losslessmusic.audio.PlaybackService;
 import com.losslessmusic.databinding.ActivityPlayerBinding;
 import com.losslessmusic.models.Song;
@@ -37,6 +37,14 @@ public class PlayerActivity extends AppCompatActivity {
             PlaybackService.LocalBinder binder = (PlaybackService.LocalBinder) service;
             playbackService = binder.getService();
             serviceBound = true;
+
+            playbackService.setOnPlaybackErrorListener(error -> {
+                handler.post(() -> {
+                    Toast.makeText(PlayerActivity.this, error, Toast.LENGTH_LONG).show();
+                    binding.qualityInfo.setText("Error: " + error);
+                });
+            });
+
             updateUI();
             startProgressUpdater();
         }
@@ -96,6 +104,19 @@ public class PlayerActivity extends AppCompatActivity {
                 userSeeking = false;
             }
         });
+
+        binding.queueButton.setOnClickListener(v -> {
+            if (serviceBound) {
+                List<Song> playlist = playbackService.getPlaylist();
+                StringBuilder sb = new StringBuilder("Queue (" + playlist.size() + " songs):\n");
+                for (int i = 0; i < playlist.size(); i++) {
+                    Song s = playlist.get(i);
+                    String marker = (i == playbackService.getCurrentIndex()) ? "▶ " : "  ";
+                    sb.append(marker).append(s.getTitle()).append(" - ").append(s.getArtist()).append("\n");
+                }
+                Toast.makeText(this, sb.toString(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void bindPlaybackService() {
@@ -118,6 +139,10 @@ public class PlayerActivity extends AppCompatActivity {
                     .placeholder(R.drawable.ic_music_note)
                     .centerCrop()
                     .into(binding.albumArt);
+        } else {
+            binding.songTitle.setText("No song playing");
+            binding.songArtist.setText("");
+            binding.qualityInfo.setText("");
         }
 
         updatePlayPauseButton();
@@ -138,10 +163,12 @@ public class PlayerActivity extends AppCompatActivity {
         long position = playbackService.getCurrentPosition();
         long duration = playbackService.getDuration();
 
-        binding.seekBar.setMax((int) duration);
-        binding.seekBar.setProgress((int) position);
-        binding.currentTime.setText(formatTime((int) position));
-        binding.totalTime.setText(formatTime((int) duration));
+        if (duration > 0) {
+            binding.seekBar.setMax((int) duration);
+            binding.seekBar.setProgress((int) position);
+            binding.currentTime.setText(formatTime((int) position));
+            binding.totalTime.setText(formatTime((int) duration));
+        }
     }
 
     private void startProgressUpdater() {
@@ -151,6 +178,7 @@ public class PlayerActivity extends AppCompatActivity {
                 if (serviceBound) {
                     updateSeekBar();
                     updatePlayPauseButton();
+                    updateUI();
                 }
                 handler.postDelayed(this, 500);
             }
