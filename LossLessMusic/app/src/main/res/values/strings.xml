@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LossLess Music</string>
+    <string name="shuffle">Shuffle</string>
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
+    <string name="play_pause">Play/Pause</string>
+    <string name="repeat">Repeat</string>
+    <string name="song_artwork">Song artwork</string>
+    <string name="service_icon">Service icon</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_library">Library</string>
+    <string name="nav_services">Services</string>
+    <string name="nav_settings">Settings</string>
+</resources>

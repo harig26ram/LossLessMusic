@@ -1,0 +1,28 @@
+# Android
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+# Keep the APK in repo
+*.apk
+
+# IDE
+*.swp
+*.swo
+*~
+.vscode/
+
+# Kotlin
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# OneDrive sync temp files
+*.tmp
+~*
