@@ -32,6 +32,7 @@ import com.losslessmusic.app.ui.theme.*
 fun HomeScreen(
     songs: List<Song>,
     isSearching: Boolean,
+    error: String?,
     onSearch: (String) -> Unit,
     onSongClick: (Song) -> Unit,
 ) {
@@ -94,6 +95,13 @@ fun HomeScreen(
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(color = AccentGreen)
+            }
+        } else if (error != null) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(error, color = ErrorColor, fontSize = 14.sp, maxLines = 3)
             }
         } else if (songs.isEmpty()) {
             Box(

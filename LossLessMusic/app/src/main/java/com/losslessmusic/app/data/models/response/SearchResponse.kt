@@ -42,6 +42,17 @@ data class SearchResponse(
     data class SectionContent(
         val musicShelfRenderer: MusicShelfRenderer? = null,
         val musicCardShelfRenderer: JsonElement? = null,
+        val itemSectionRenderer: ItemSectionRenderer? = null,
+    )
+
+    @Serializable
+    data class ItemSectionRenderer(
+        val contents: List<ItemSectionContent>? = null,
+    )
+
+    @Serializable
+    data class ItemSectionContent(
+        val musicResponsiveListItemRenderer: MusicResponsiveListItemRenderer? = null,
     )
 
     @Serializable

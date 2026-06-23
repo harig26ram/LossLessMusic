@@ -33,6 +33,7 @@ class MainActivity : ComponentActivity() {
                     HomeScreen(
                         songs = viewModel.songs,
                         isSearching = viewModel.isSearching,
+                        error = viewModel.error,
                         onSearch = { viewModel.search(it) },
                         onSongClick = { song ->
                             viewModel.playSong(song)

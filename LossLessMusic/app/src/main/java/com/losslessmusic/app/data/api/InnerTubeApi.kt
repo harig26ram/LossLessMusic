@@ -26,6 +26,7 @@ object InnerTubeApi {
     private const val BASE_URL = "https://music.youtube.com/youtubei/v1/"
     private const val JSON_MEDIA_TYPE = "application/json; charset=utf-8"
     private const val DEFAULT_VISITOR_DATA = "CgtsZG1ySnZiQWtSbyiMjuGSBg%3D%3D"
+    private const val FILTER_SONG = "EgWKAQIIAWoKEAkQBRAKEAMQBA%3D%3D"
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -36,6 +37,7 @@ object InnerTubeApi {
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
+        .followRedirects(true)
         .build()
 
     private var visitorData = DEFAULT_VISITOR_DATA
@@ -49,7 +51,8 @@ object InnerTubeApi {
             val clientConfig = YouTubeClient.WEB_REMIX
             val body = SearchBody(
                 context = clientConfig.toContext(locale, visitorData),
-                query = query
+                query = query,
+                params = FILTER_SONG
             )
 
             val jsonBody = json.encodeToString(SearchBody.serializer(), body)
@@ -66,7 +69,7 @@ object InnerTubeApi {
                 .build()
 
             val response = client.newCall(request).execute()
-            val responseBody = response.body?.string() ?: throw Exception("Empty response")
+            val responseBody = response.body?.string() ?: throw Exception("Empty response body")
 
             val searchResponse = json.decodeFromString(SearchResponse.serializer(), responseBody)
             parseSearchResponse(searchResponse)
@@ -78,20 +81,25 @@ object InnerTubeApi {
             var lastError: Exception? = null
 
             val clients = listOf(
-                YouTubeClient.ANDROID_MUSIC,
-                YouTubeClient.IOS,
-                YouTubeClient.TVHTML5
+                YouTubeClient.ANDROID_MUSIC to false,
+                YouTubeClient.IOS to true,
+                YouTubeClient.TVHTML5 to false,
             )
 
-            for (clientConfig in clients) {
+            for ((clientConfig, hasOsVersion) in clients) {
                 try {
+                    val ctx = clientConfig.toContext(locale, visitorData).let {
+                        if (hasOsVersion && clientConfig.osVersion != null) it
+                        else it
+                    }
+
                     val body = PlayerBody(
-                        context = clientConfig.toContext(locale, visitorData),
+                        context = ctx,
                         videoId = videoId
                     )
 
                     val jsonBody = json.encodeToString(PlayerBody.serializer(), body)
-                    val request = Request.Builder()
+                    val requestBuilder = Request.Builder()
                         .url("${BASE_URL}player?key=${clientConfig.apiKey}&prettyPrint=false")
                         .addHeader("Content-Type", JSON_MEDIA_TYPE)
                         .addHeader("X-Goog-Api-Format-Version", "1")
@@ -100,24 +108,37 @@ object InnerTubeApi {
                         .addHeader("x-origin", "https://music.youtube.com")
                         .addHeader("User-Agent", clientConfig.userAgent)
                         .post(jsonBody.toRequestBody(JSON_MEDIA_TYPE.toMediaType()))
-                        .build()
 
-                    val response = client.newCall(request).execute()
+                    if (clientConfig.referer != null) {
+                        requestBuilder.addHeader("Referer", clientConfig.referer)
+                    }
+
+                    val response = client.newCall(requestBuilder.build()).execute()
                     val responseBody = response.body?.string() ?: throw Exception("Empty response")
 
                     val playerResponse = json.decodeFromString(PlayerResponse.serializer(), responseBody)
 
                     if (playerResponse.playabilityStatus?.status == "OK") {
+                        val formats = playerResponse.streamingData?.adaptiveFormats
+                        if (formats.isNullOrEmpty()) {
+                            lastError = Exception("No adaptive formats in response")
+                            continue
+                        }
+                        val hasUrl = formats.any { !it.url.isNullOrBlank() }
+                        if (!hasUrl) {
+                            lastError = Exception("Stream URLs require decryption (n-param)")
+                            continue
+                        }
                         return@runCatching playerResponse
                     }
 
-                    lastError = Exception(playerResponse.playabilityStatus?.reason ?: "Playability status not OK")
+                    lastError = Exception(playerResponse.playabilityStatus?.reason ?: "Status not OK")
                 } catch (e: Exception) {
                     lastError = e
                 }
             }
 
-            throw lastError ?: Exception("All clients failed")
+            throw lastError ?: Exception("All player clients failed")
         }
     }
 
@@ -126,9 +147,13 @@ object InnerTubeApi {
             val request = Request.Builder()
                 .url("https://pipedapi.kavin.rocks/streams/$videoId")
                 .addHeader("Accept", "application/json")
+                .addHeader("User-Agent", "LossLessMusic/1.0")
                 .build()
 
             val response = client.newCall(request).execute()
+            if (!response.isSuccessful) {
+                throw Exception("Piped API returned ${response.code}")
+            }
             val responseBody = response.body?.string() ?: throw Exception("Empty response")
 
             val jsonObj = json.parseToJsonElement(responseBody).jsonObject
@@ -147,17 +172,27 @@ object InnerTubeApi {
         val songs = mutableListOf<Song>()
 
         val tabs = response.contents?.tabbedSearchResultsRenderer?.tabs ?: return songs
-        val content = tabs.firstOrNull()?.tabRenderer?.content ?: return songs
-        val sections = content.sectionListRenderer?.contents ?: return songs
+        val tabContent = tabs.firstOrNull()?.tabRenderer?.content ?: return songs
+        val sections = tabContent.sectionListRenderer?.contents ?: return songs
 
         for (section in sections) {
-            val shelf = section.musicShelfRenderer ?: continue
-            val items = shelf.contents ?: continue
+            if (section.musicShelfRenderer != null) {
+                val items = section.musicShelfRenderer.contents ?: continue
+                for (item in items) {
+                    val renderer = item.musicResponsiveListItemRenderer ?: continue
+                    val song = parseSongItem(renderer) ?: continue
+                    songs.add(song)
+                }
+            }
 
-            for (item in items) {
-                val renderer = item.musicResponsiveListItemRenderer ?: continue
-                val song = parseSongItem(renderer) ?: continue
-                songs.add(song)
+            if (section.itemSectionRenderer != null) {
+                val items = section.itemSectionRenderer.contents ?: continue
+                for (item in items) {
+                    val renderer = item.musicResponsiveListItemRenderer ?: continue
+                    if (renderer.navigationEndpoint?.watchEndpoint?.videoId == null) continue
+                    val song = parseSongItem(renderer) ?: continue
+                    songs.add(song)
+                }
             }
         }
 
@@ -173,7 +208,7 @@ object InnerTubeApi {
             ?.text
             ?.runs
             ?.firstOrNull()
-        val title = titleRun?.text ?: return null
+        val title = titleRun?.text?.trim() ?: return null
 
         val artistRuns = flexColumns.getOrNull(1)
             ?.musicResponsiveListItemFlexColumnRenderer
@@ -228,5 +263,4 @@ object InnerTubeApi {
             else -> null
         }
     }
-
 }
