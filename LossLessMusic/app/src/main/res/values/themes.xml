@@ -1,41 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.LossLessMusic" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/color_primary</item>
-        <item name="colorPrimaryDark">@color/color_primary_dark</item>
-        <item name="colorAccent">@color/color_accent</item>
-        <item name="android:windowBackground">@color/background</item>
-        <item name="android:statusBarColor">@color/status_bar</item>
-        <item name="android:navigationBarColor">@color/background</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
-        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.LossLessMusic.Small</item>
-        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.LossLessMusic.Medium</item>
-        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.LossLessMusic.Large</item>
-    </style>
-
-    <style name="Theme.LossLessMusic.Player" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/color_primary</item>
-        <item name="android:windowBackground">@color/background_player</item>
-        <item name="android:statusBarColor">@color/background_player</item>
-        <item name="android:navigationBarColor">@color/background_player</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
-        <item name="android:windowTranslucentStatus">true</item>
-    </style>
-
-    <style name="ShapeAppearance.LossLessMusic.Small" parent="ShapeAppearance.Material3.SmallComponent">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">8dp</item>
-    </style>
-
-    <style name="ShapeAppearance.LossLessMusic.Medium" parent="ShapeAppearance.Material3.MediumComponent">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">12dp</item>
-    </style>
-
-    <style name="ShapeAppearance.LossLessMusic.Large" parent="ShapeAppearance.Material3.LargeComponent">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">16dp</item>
+    <style name="Theme.LossLessMusic" parent="android:Theme">
+        <item name="android:statusBarColor">#FF0D0D0D</item>
+        <item name="android:navigationBarColor">#FF0D0D0D</item>
+        <item name="android:windowBackground">#FF0D0D0D</item>
     </style>
 </resources>

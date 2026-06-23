@@ -10,6 +10,11 @@ import com.losslessmusic.app.data.models.response.SearchResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -20,6 +25,7 @@ import java.util.concurrent.TimeUnit
 object InnerTubeApi {
     private const val BASE_URL = "https://music.youtube.com/youtubei/v1/"
     private const val JSON_MEDIA_TYPE = "application/json; charset=utf-8"
+    private const val DEFAULT_VISITOR_DATA = "CgtsZG1ySnZiQWtSbyiMjuGSBg%3D%3D"
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -126,13 +132,13 @@ object InnerTubeApi {
             val responseBody = response.body?.string() ?: throw Exception("Empty response")
 
             val jsonObj = json.parseToJsonElement(responseBody).jsonObject
-            val audioStreams = jsonObj["audioStreams"]?.jsonArray ?: throw Exception("No audio streams")
+            val audioStreams = jsonObj["audioStreams"] as? JsonArray ?: throw Exception("No audio streams")
 
-            val bestStream = audioStreams.maxByOrNull {
-                it.jsonObject["bitrate"]?.jsonPrimitive?.content?.toIntOrNull() ?: 0
-            }
+            val bestStream = audioStreams.maxByOrNull { element ->
+                (element as JsonObject)["bitrate"]?.jsonPrimitive?.content?.toIntOrNull() ?: 0
+            } as? JsonObject
 
-            bestStream?.jsonObject?.get("url")?.jsonPrimitive?.content
+            bestStream?.get("url")?.jsonPrimitive?.content
                 ?: throw Exception("No stream URL found")
         }
     }
@@ -223,5 +229,4 @@ object InnerTubeApi {
         }
     }
 
-    private const val DEFAULT_VISITOR_DATA = "CgtsZG1ySnZiQWtSbyiMjuGSBg%3D%3D"
 }

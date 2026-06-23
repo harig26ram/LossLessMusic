@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -32,8 +33,12 @@ class MusicPlayer(context: Context) {
         val mediaItem = MediaItem.Builder()
             .setMediaId(song.id)
             .setUri(song.streamUrl ?: return)
-            .setTitle(song.title)
-            .setArtist(song.artists)
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(song.title)
+                    .setArtist(song.artists)
+                    .build()
+            )
             .build()
 
         exoPlayer.setMediaItem(mediaItem)
