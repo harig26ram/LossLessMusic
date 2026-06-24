@@ -1,80 +1,90 @@
 package com.losslessmusic.app.player
 
-import android.content.Context
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import com.losslessmusic.app.data.models.Song
+import com.losslessmusic.app.domain.model.Song
+import com.losslessmusic.app.diag.CrashLogger
+import javax.inject.Inject
+import javax.inject.Singleton
 
-@UnstableApi
-class MusicPlayer(context: Context) {
-    private val exoPlayer: ExoPlayer = ExoPlayer.Builder(context)
-        .setAudioAttributes(
-            AudioAttributes.Builder()
-                .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
-                .setUsage(C.USAGE_MEDIA)
-                .build(),
-            true
-        )
+@Singleton
+class MusicPlayer @Inject constructor(
+    private val context: android.content.Context
+) {
+    private val logger = CrashLogger
+    private val _player: ExoPlayer = ExoPlayer.Builder(context)
+        .setAudioAttributes(AudioAttributes.Builder()
+            .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+            .setUsage(C.USAGE_MEDIA)
+            .build(), true)
         .setHandleAudioBecomingNoisy(true)
         .build()
 
-    private var currentSong: Song? = null
-    private val listeners = mutableListOf<Player.Listener>()
+    private val _listeners = mutableListOf<Player.Listener>()
+    var currentSong: Song? = null
+        private set
 
-    val player: ExoPlayer get() = exoPlayer
+    val player: ExoPlayer get() = _player
 
     fun play(song: Song) {
-        currentSong = song
-        val mediaItem = MediaItem.Builder()
-            .setMediaId(song.id)
-            .setUri(song.streamUrl ?: return)
-            .setMediaMetadata(
-                MediaMetadata.Builder()
+        try {
+            currentSong = song
+            val url = song.streamUrl ?: run {
+                logger.e("Player", "No stream URL for ${song.title}")
+                return
+            }
+            val mediaItem = MediaItem.Builder()
+                .setMediaId(song.id)
+                .setUri(url)
+                .setMediaMetadata(MediaMetadata.Builder()
                     .setTitle(song.title)
                     .setArtist(song.artists)
-                    .build()
-            )
-            .build()
+                    .build())
+                .build()
 
-        exoPlayer.setMediaItem(mediaItem)
-        exoPlayer.prepare()
-        exoPlayer.play()
-    }
-
-    fun togglePlayPause() {
-        if (exoPlayer.isPlaying) {
-            exoPlayer.pause()
-        } else {
-            exoPlayer.play()
+            _player.stop()
+            _player.clearMediaItems()
+            _player.setMediaItem(mediaItem)
+            _player.prepare()
+            _player.play()
+            logger.w("Player", "Playing: ${song.title}")
+        } catch (e: Exception) {
+            logger.e("Player", e)
         }
     }
 
-    fun seekTo(positionMs: Long) {
-        exoPlayer.seekTo(positionMs)
+    fun togglePlayPause() {
+        try {
+            if (_player.isPlaying) _player.pause() else _player.play()
+        } catch (e: Exception) {
+            logger.e("Player.toggle", e)
+        }
     }
 
-    fun isPlaying(): Boolean = exoPlayer.isPlaying
-
-    fun currentPosition(): Long = exoPlayer.currentPosition
-
-    fun duration(): Long = exoPlayer.duration
-
-    fun release() {
-        exoPlayer.release()
+    fun seekTo(posMs: Long) {
+        try { _player.seekTo(posMs) } catch (e: Exception) { logger.e("Player.seek", e) }
     }
 
     fun addListener(listener: Player.Listener) {
-        listeners.add(listener)
-        exoPlayer.addListener(listener)
+        _listeners.add(listener)
+        _player.addListener(listener)
     }
 
     fun removeListener(listener: Player.Listener) {
-        listeners.remove(listener)
-        exoPlayer.removeListener(listener)
+        _listeners.remove(listener)
+        _player.removeListener(listener)
+    }
+
+    fun isPlaying(): Boolean = _player.isPlaying
+    fun currentPosition(): Long = _player.currentPosition
+    fun duration(): Long = _player.duration
+
+    fun release() {
+        _player.release()
+        _listeners.clear()
     }
 }
