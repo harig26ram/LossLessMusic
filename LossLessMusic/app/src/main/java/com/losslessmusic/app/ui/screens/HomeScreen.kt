@@ -42,11 +42,11 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(DarkBackground)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Text(
             text = "LossLessMusic",
-            color = TextPrimary,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 20.dp, top = 48.dp, bottom = 16.dp)
@@ -55,8 +55,8 @@ fun HomeScreen(
         OutlinedTextField(
             value = query,
             onValueChange = { query = it },
-            placeholder = { Text("Search songs, artists, albums...", color = TextTertiary) },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = TextSecondary) },
+            placeholder = { Text("Search songs, artists, albums...", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
             trailingIcon = {
                 if (query.isNotEmpty()) {
                     IconButton(onClick = {
@@ -64,60 +64,59 @@ fun HomeScreen(
                         onSearch("")
                         focusManager.clearFocus()
                     }) {
-                        Icon(Icons.Default.Close, contentDescription = "Clear", tint = TextSecondary)
+                        Icon(Icons.Default.Close, contentDescription = "Clear", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(onSearch = {
-                onSearch(query.trim())
-                focusManager.clearFocus()
+                val q = query.trim()
+                if (q.isNotEmpty()) {
+                    focusManager.clearFocus()
+                    onSearch(q)
+                }
             }),
             singleLine = true,
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = TextPrimary,
-                unfocusedTextColor = TextPrimary,
-                focusedBorderColor = AccentGreen,
-                unfocusedBorderColor = DarkSurfaceVariant,
-                cursorColor = AccentGreen,
-                focusedContainerColor = DarkSurface,
-                unfocusedContainerColor = DarkSurface,
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+                cursorColor = MaterialTheme.colorScheme.primary,
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
             ),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         )
 
-        if (isSearching) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = AccentGreen)
+        when {
+            isSearching -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                }
             }
-        } else if (error != null) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(error, color = ErrorColor, fontSize = 14.sp, maxLines = 3)
+            error != null -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(error, color = MaterialTheme.colorScheme.error, fontSize = 14.sp, maxLines = 5)
+                }
             }
-        } else if (songs.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Search for your favorite music", color = TextTertiary, fontSize = 16.sp)
+            songs.isEmpty() -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Search for your favorite music", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
+                }
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                items(songs, key = { it.id }) { song ->
-                    SongCard(song = song, onClick = { onSongClick(song) })
+            else -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(songs, key = { it.id }) { song ->
+                        SongCard(song = song, onClick = { onSongClick(song) })
+                    }
                 }
             }
         }
@@ -129,47 +128,46 @@ fun SongCard(song: Song, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
-            .background(DarkSurface)
-            .padding(8.dp),
+            .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AsyncImage(
             model = song.thumbnailUrl,
-            contentDescription = song.title,
+            contentDescription = null,
             modifier = Modifier
                 .size(56.dp)
-                .clip(RoundedCornerShape(6.dp)),
+                .clip(RoundedCornerShape(8.dp)),
             contentScale = ContentScale.Crop,
         )
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(Modifier.width(12.dp))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = song.title,
-                color = TextPrimary,
-                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 15.sp,
+                fontWeight = FontWeight.Medium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
                 text = song.artists,
-                color = TextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 13.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-        }
-
-        if (song.duration != null) {
-            Text(
-                text = "${song.duration / 60}:${String.format("%02d", song.duration % 60)}",
-                color = TextTertiary,
-                fontSize = 12.sp,
-            )
+            if (song.album != null) {
+                Text(
+                    text = song.album,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    fontSize = 12.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
     }
 }

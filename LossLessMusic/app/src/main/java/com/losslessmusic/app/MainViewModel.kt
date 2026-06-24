@@ -1,6 +1,7 @@
 package com.losslessmusic.app
 
 import android.app.Application
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -12,6 +13,7 @@ import androidx.media3.common.Player
 import com.losslessmusic.app.data.models.Song
 import com.losslessmusic.app.data.repository.MusicRepository
 import com.losslessmusic.app.player.MusicPlayer
+import com.losslessmusic.app.ui.theme.ThemeMode
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -34,30 +36,29 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         private set
     var error by mutableStateOf<String?>(null)
         private set
+    var showPlayer by mutableStateOf(false)
+        private set
+    var themeMode by mutableStateOf(ThemeMode.DARK)
+        private set
 
     private var positionUpdateJob: Job? = null
 
     init {
         player.addListener(object : Player.Listener {
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                this@MainViewModel.isPlaying = isPlaying
-                if (isPlaying) startPositionUpdates()
-                else stopPositionUpdates()
+            override fun onIsPlayingChanged(playing: Boolean) {
+                isPlaying = playing
+                if (playing) startPositionUpdates() else stopPositionUpdates()
             }
 
             override fun onPlaybackStateChanged(playbackState: Int) {
                 when (playbackState) {
-                    Player.STATE_READY -> {
-                        duration = player.player.duration
-                    }
-                    Player.STATE_ENDED -> {
-                        isPlaying = false
-                    }
+                    Player.STATE_READY -> duration = player.player.duration
+                    Player.STATE_ENDED -> isPlaying = false
                 }
             }
 
-            override fun onPlayerError(error: PlaybackException) {
-                this@MainViewModel.error = "Playback error: ${error.localizedMessage}"
+            override fun onPlayerError(err: PlaybackException) {
+                error = "Playback error: ${err.localizedMessage}"
             }
         })
     }
@@ -67,50 +68,62 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             songs = emptyList()
             return
         }
-
         viewModelScope.launch {
-            isSearching = true
-            error = null
-            val result = repository.search(query)
-            result.onSuccess { songs = it }
-            result.onFailure { error = "Search failed: ${it.message}" }
-            isSearching = false
+            try {
+                isSearching = true
+                error = null
+                val result = repository.search(query)
+                result.onSuccess { songs = it }
+                result.onFailure { e ->
+                    Log.e("MainViewModel", "Search failed", e)
+                    error = "Search failed: ${e.message}"
+                }
+            } catch (e: Exception) {
+                Log.e("MainViewModel", "Uncaught search error", e)
+                error = "Unexpected error: ${e.message}"
+            } finally {
+                isSearching = false
+            }
         }
     }
 
     fun playSong(song: Song) {
         viewModelScope.launch {
-            currentSong = song
-            error = null
+            try {
+                currentSong = song
+                error = null
+                showPlayer = true
 
-            val result = repository.getStreamUrl(song.id)
-            result.onSuccess { playerResponse ->
-                val streamUrl = playerResponse.streamingData?.adaptiveFormats
-                    ?.filter { it.isAudio }
-                    ?.maxByOrNull { it.bitrate ?: 0 }
-                    ?.url
+                val result = repository.getStreamUrl(song.id)
+                result.onSuccess { playerResponse ->
+                    val streamUrl = playerResponse.streamingData?.adaptiveFormats
+                        ?.filter { it.isAudio }
+                        ?.maxByOrNull { it.bitrate ?: 0 }
+                        ?.url
 
-                if (streamUrl != null) {
-                    val playableSong = song.copy(streamUrl = streamUrl)
-                    currentSong = playableSong
-                    player.play(playableSong)
-                } else {
-                    error = "No audio stream found"
+                    if (streamUrl != null) {
+                        val playableSong = song.copy(streamUrl = streamUrl)
+                        currentSong = playableSong
+                        player.play(playableSong)
+                    } else {
+                        error = "No audio stream found"
+                    }
                 }
-            }
-            result.onFailure { e ->
-                error = "Failed to get stream: ${e.message}"
+                result.onFailure { e ->
+                    Log.e("MainViewModel", "Stream failed", e)
+                    error = "Failed to get stream: ${e.message}"
+                }
+            } catch (e: Exception) {
+                Log.e("MainViewModel", "Uncaught play error", e)
+                error = "Playback error: ${e.message}"
             }
         }
     }
 
-    fun togglePlayPause() {
-        player.togglePlayPause()
-    }
-
-    fun seekTo(positionMs: Long) {
-        player.seekTo(positionMs)
-    }
+    fun togglePlayPause() = player.togglePlayPause()
+    fun seekTo(positionMs: Long) = player.seekTo(positionMs)
+    fun navigateToPlayer(show: Boolean) { showPlayer = show }
+    fun updateTheme(mode: ThemeMode) { themeMode = mode }
 
     private fun startPositionUpdates() {
         positionUpdateJob?.cancel()
