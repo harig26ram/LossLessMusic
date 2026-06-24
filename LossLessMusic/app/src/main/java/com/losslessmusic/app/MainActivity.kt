@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.losslessmusic.app.ui.components.MiniPlayer
 import com.losslessmusic.app.ui.screens.*
-import com.losslessmusic.app.ui.theme.*
+import com.losslessmusic.app.ui.theme.LossLessMusicTheme
 import com.losslessmusic.app.ui.theme.ThemeMode
 
 enum class Screen(val label: String, val icon: ImageVector) {
@@ -30,47 +30,42 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val viewModel: MainViewModel = viewModel()
+            val vm: MainViewModel = viewModel()
             val currentScreen = remember { mutableStateOf(Screen.HOME) }
 
-            LossLessMusicTheme(themeMode = viewModel.themeMode) {
-                if (viewModel.showPlayer && viewModel.currentSong != null) {
+            LossLessMusicTheme(themeMode = vm.themeMode) {
+                if (vm.showPlayer && vm.currentSong != null) {
                     PlayerScreen(
-                        song = viewModel.currentSong,
-                        isPlaying = viewModel.isPlaying,
-                        currentPosition = viewModel.currentPosition,
-                        duration = viewModel.duration,
-                        onTogglePlayPause = { viewModel.togglePlayPause() },
-                        onSeek = { viewModel.seekTo(it) },
-                        onBack = { viewModel.navigateToPlayer(false) },
+                        song = vm.currentSong,
+                        isPlaying = vm.isPlaying,
+                        currentPosition = vm.currentPosition,
+                        duration = vm.duration,
+                        onTogglePlayPause = { vm.togglePlayPause() },
+                        onSeek = { vm.seekTo(it) },
+                        onBack = { vm.navigateToPlayer(false) },
                     )
                 } else {
                     Scaffold(
                         bottomBar = {
                             Column {
-                                if (viewModel.currentSong != null) {
+                                if (vm.currentSong != null) {
                                     MiniPlayer(
-                                        song = viewModel.currentSong,
-                                        isPlaying = viewModel.isPlaying,
-                                        onTogglePlayPause = { viewModel.togglePlayPause() },
-                                        onClick = { viewModel.navigateToPlayer(true) },
+                                        song = vm.currentSong,
+                                        isPlaying = vm.isPlaying,
+                                        onTogglePlayPause = { vm.togglePlayPause() },
+                                        onClick = { vm.navigateToPlayer(true) },
                                     )
                                 }
-                                NavigationBar(
-                                    containerColor = MaterialTheme.colorScheme.surface,
-                                ) {
+                                NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                                     Screen.entries.forEach { screen ->
                                         NavigationBarItem(
                                             selected = currentScreen.value == screen,
-                                            onClick = { currentScreen.value = screen },
-                                            icon = { Icon(screen.icon, contentDescription = screen.label) },
-                                            label = {
-                                                Text(
-                                                    screen.label,
-                                                    fontSize = if (currentScreen.value == screen) 12.sp else 11.sp,
-                                                    fontWeight = if (currentScreen.value == screen) FontWeight.SemiBold else FontWeight.Normal,
-                                                )
+                                            onClick = {
+                                                currentScreen.value = screen
+                                                if (screen == Screen.HOME) vm.loadHomeFeed()
                                             },
+                                            icon = { Icon(screen.icon, contentDescription = screen.label) },
+                                            label = { Text(screen.label, fontSize = if (currentScreen.value == screen) 12.sp else 11.sp, fontWeight = if (currentScreen.value == screen) FontWeight.SemiBold else FontWeight.Normal) },
                                             colors = NavigationBarItemDefaults.colors(
                                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                                 selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -87,16 +82,23 @@ class MainActivity : ComponentActivity() {
                         Box(modifier = Modifier.padding(padding)) {
                             when (currentScreen.value) {
                                 Screen.HOME -> HomeScreen(
-                                    songs = viewModel.songs,
-                                    isSearching = viewModel.isSearching,
-                                    error = viewModel.error,
-                                    onSearch = { viewModel.search(it) },
-                                    onSongClick = { viewModel.playSong(it) },
+                                    homeSections = vm.homeSections,
+                                    songs = vm.songs,
+                                    isSearching = vm.isSearching,
+                                    isLoadingHome = vm.isLoadingHome,
+                                    error = vm.error,
+                                    moodCategories = vm.moodCategories,
+                                    onSearch = { vm.search(it) },
+                                    onSongClick = { vm.playSong(it) },
+                                    onAlbumClick = { },
+                                    onArtistClick = { },
+                                    onPlaylistClick = { },
+                                    onMoodClick = { vm.loadHomeFeed() },
                                 )
                                 Screen.LIBRARY -> LibraryScreen()
                                 Screen.SETTINGS -> SettingsScreen(
-                                    themeMode = viewModel.themeMode,
-                                    onThemeChange = { viewModel.updateTheme(it) },
+                                    themeMode = vm.themeMode,
+                                    onThemeChange = { vm.updateTheme(it) },
                                 )
                             }
                         }
